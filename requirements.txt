@@ -1,0 +1,10 @@
+# Runtime dependencies of the gradecrossing package (Python >= 3.8).
+# 3.8 is the floor because JetPack 5 Jetsons ship Python 3.8; the package is 3.8-syntax
+# clean and uses no 3.9+ runtime API (tests/test_monitor.py pins that with an ast check).
+# It is developed on 3.9-3.12. On Jetson install torch/torchvision from NVIDIA's wheels
+# first, then these.
+numpy>=1.24
+opencv-python>=4.8,<5
+ultralytics>=8.3
+pyyaml>=6
+lap>=0.5.12          # linear assignment used by the ultralytics ByteTrack/BoT-SORT trackers

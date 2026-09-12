@@ -1,0 +1,38 @@
+# The FOX13 "Rail-Grade-Crossing-StressTest.mov" clip (1772x872, 31.45 fps, ~32.7 s), from the
+# upstream GitHub Releases tab (v1.1). Put the file in videos/ (git-ignored).
+#
+#   python -m gradecrossing.monitor --config configs/stresstest.yaml --events events.jsonl
+#   python -m gradecrossing.evaluate --events events.jsonl --truth data/truth.csv
+#       --video Rail-Grade-Crossing-StressTest.mov --duration-s 32.7
+#
+# Only the keys that differ from configs/default.yaml are listed.
+
+video:
+  source: "videos/Rail-Grade-Crossing-StressTest.mov"
+
+zone:
+  # Crossing polygon at the native 1772x872 resolution (the polygon the original prototype used).
+  polygon: [[100, 400], [500, 350], [1650, 480], [1500, 600]]
+
+detector:
+  # COCO-pretrained; downloads on first use. Keep a model with a "train" class for this clip:
+  # a train passes through the zone, and a train the detector does not name is not excluded
+  # from the debris mask. The immobility test in background.py stops most such objects from
+  # alarming, but a long train filling the zone can still look static - with
+  # --weights 50_epochs_best.pt (6 vehicle classes, no train) add --config override
+  # debris.enabled: false, or expect a debris alarm during the passage.
+  weights: "yolo11n.pt"
+  conf: 0.25
+  tracker: "bytetrack.yaml"
+
+debris:
+  # The clip is short: a 300-frame warm-up would eat 10 s of a 32 s video. The first
+  # seconds of the clip show an empty crossing, which is what the warm-up needs.
+  warmup_frames: 90
+
+alerts:
+  stdout: true
+  events_jsonl: ""            # pass --events events.jsonl on the command line
+
+output:
+  print_every_n_frames: 30

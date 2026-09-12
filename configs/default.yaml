@@ -1,0 +1,141 @@
+# Default configuration for the grade-crossing monitor.
+#
+# Every value here equals the dataclass default in gradecrossing/config.py (a test pins
+# that, so this file is always an accurate reference). Copy it, change what you need
+# and run:  python -m gradecrossing.monitor --config configs/mysite.yaml
+#
+# Rules of thumb: areas are fractions of the zone area, times are seconds, speeds are
+# pixels/second at the processing resolution (metres/second if stuck.ground_plane_homography
+# is set). Nothing is a pixel count, so a config transfers between cameras.
+# Unknown keys are an error (load_config raises), which catches typos early.
+
+video:
+  source: "0"                 # file path, RTSP/HTTP URL, or camera index as a string ("0")
+  fps_override: null          # force a frame rate when the container reports 0/garbage (files: t = frame/fps)
+  resize_width: null          # process at this width (aspect kept); the zone polygon is scaled with it
+  start_seconds: 0.0          # seek before processing (files only)
+  max_frames: null            # stop after N frames (null = run to the end / forever)
+  loop: false                 # loop a file (soak tests); all state is reset at each restart
+  live: null                  # null = auto (URLs and camera indices are live, paths are files)
+
+zone:
+  # Polygon in pixels of the *calibration* frame (native resolution), around the crossing.
+  # Draw it with tools/calibrate_zone.py. Order the points around the boundary.
+  polygon: [[100, 400], [500, 350], [1650, 480], [1500, 600]]
+  stabilize: true             # track camera motion and warp the polygon every frame
+  # Shi-Tomasi features on the reference keyframe (background only, see exclude_features_in_zone)
+  max_corners: 400
+  quality_level: 0.01
+  min_distance: 20
+  block_size: 7
+  # Lucas-Kanade optical flow
+  lk_win_size: 21
+  lk_max_level: 3
+  # RANSAC homography
+  ransac_reproj_threshold: 3.0
+  min_inliers: 30             # fewer inliers = unhealthy estimate (try ORB, else hold the last good polygon)
+  # An LK estimate must also keep this share of the reference features as inliers
+  # (needed = max(min_inliers, min_inlier_fraction * n_features)). A minority of corners
+  # locked onto self-similar sleeper/ballast texture can agree on a wrong homography and
+  # still clear min_inliers; 0 disables the relative test.
+  min_inlier_fraction: 0.2
+  # ORB descriptor fallback for large jumps / exposure change
+  orb_fallback: true
+  orb_features: 1500
+  orb_ratio_test: 0.75
+  orb_min_matches: 25
+  # Reject homographies that scale or change the polygon area implausibly
+  max_scale_change: 0.35
+  max_area_change: 0.5
+  # Re-anchor the reference keyframe after the scene has been static and healthy this long (0 = never)
+  keyframe_refresh_static_seconds: 60.0
+  exclude_features_in_zone: true   # features inside the zone belong to traffic, not background
+  health_events: true         # emit a HEALTH event when the stabilizer flips healthy <-> unhealthy
+
+detector:
+  weights: "yolo11n.pt"       # COCO-pretrained (auto-download) or a local .pt/.engine/.onnx
+  conf: 0.25
+  iou: 0.5
+  imgsz: 640
+  device: ""                  # "" auto, "0" first CUDA GPU, "cpu"
+  half: false                 # FP16 (CUDA / TensorRT only)
+  tracker: "bytetrack.yaml"   # ultralytics tracker config; "" = plain detection + IoU fallback ids
+  detect_every_n_frames: 1    # >1 skips detector frames and propagates boxes from track velocity
+  # Class names (case-insensitive) that feed the stuck-vehicle logic. Covers COCO and the CCTV_Vehicles model.
+  vehicle_classes: [car, truck, bus, motorcycle, motorbike, jeep, van, tricycle, bicycle]
+  person_classes: [person, pedestrian]
+  train_classes: [train]      # a train in the zone is normal: never an alert, still excluded from the debris mask
+  max_det: 100
+
+infrastructure:
+  enabled: false              # gate-arm / signal detector (shortens alert thresholds when gates are down)
+  weights: "notebooks/infrastructure tuning best weights/best.pt"
+  conf: 0.35
+  imgsz: 640
+  device: ""
+  half: false
+  every_n_frames: 15          # gate state changes slowly; no need to run every frame
+  gate_down_classes: [railroad-crossing-down]
+  light_on_classes: [railroad-sign-light-on]
+  hold_seconds: 4.0           # gates_down stays true this long after the last gate-down detection
+
+stuck:
+  speed_threshold: 12.0       # px/s below which an object is stationary (m/s with ground_plane_homography)
+  speed_window_seconds: 1.0   # least-squares velocity fit over this window of bottom-center positions
+  min_history_for_speed: 3    # no speed estimate (and no stuck time) until this many samples exist
+  ground_plane_homography: null   # optional 3x3 pixel -> ground metres; speeds become m/s
+  warning_seconds: 3.0        # stuck (in zone AND stationary) this long -> WARNING
+  alarm_seconds: 8.0          # ... -> ALARM
+  dwell_warning_seconds: 12.0 # in zone this long regardless of speed -> WARNING (creeping queue)
+  dwell_alarm_seconds: 25.0
+  gates_down_warning_seconds: 1.0   # thresholds used while the gates are reported down
+  gates_down_alarm_seconds: 3.0
+  gates_down_dwell_alarm_seconds: 6.0
+  lost_track_grace_seconds: 1.0     # keep an unseen track this long before dropping it
+  min_track_age_frames: 2           # ignore brand-new ids (tracker flicker) for the zone logic
+  fallback_iou_threshold: 0.3       # IoU matcher used when detections carry no track ids
+  person_warning_seconds: 2.0
+  person_alarm_seconds: 10.0
+
+debris:
+  enabled: true
+  history: 300                # MOG2 history (only matters during warm-up and refresh)
+  var_threshold: 50.0
+  detect_shadows: true        # shadow pixels are dropped; set false for night/IR cameras (dark objects)
+  warmup_frames: 300          # frames learned before monitoring starts; start on a clear crossing
+  monitoring_learning_rate: 0.0     # 0 = background frozen: a stationary obstruction is never absorbed
+  empty_seconds_before_refresh: 5.0 # adapt slowly once the tracker has seen the zone empty this long (0 = never)
+  empty_learning_rate: 0.005
+  exclusion_dilate_px: 12     # detection boxes are grown by this before being removed from the foreground
+  morph_kernel: 5
+  min_blob_area_fraction: 0.002     # drop connected components smaller than this fraction of the zone
+  min_area_fraction: 0.03           # total debris area needed to start the persistence timer
+  persist_seconds: 3.0              # continuous seconds over threshold before a debris ALARM
+  # Foreground bigger than this fraction of an *empty* zone AND of the frame outside the zone
+  # is a lighting step (floodlight, IR-cut switch, exposure jump), not an obstruction: the
+  # background model is re-warmed and a HEALTH event is emitted instead of latching an alarm
+  # that could never clear. 0 = off, which makes such a step alarm as debris (and stay
+  # alarmed until the monitor restarts).
+  max_area_fraction: 0.75
+  # Debris must be immobile: the persistence timer restarts on any frame where more than
+  # static_motion_fraction of the candidate pixels change by more than static_motion_diff
+  # grey levels, or where the continuously-present part of the blob drops below
+  # min_area_fraction. Without this an undetected object (a train under weights with no
+  # "train" class, a crowd) alarms simply by taking longer than persist_seconds to cross.
+  static_motion_diff: 12.0          # 0 disables the frame-to-frame content test
+  static_motion_fraction: 0.15
+
+alerts:
+  latch_seconds: 10.0         # ALARM stays raised this long after the last alarm condition
+  repeat_notify_seconds: 30.0 # re-send ALARM_START (extra.repeat=true) while it persists (0 = never)
+  stdout: true                # print events to the console
+  events_jsonl: ""            # path of the JSONL event log ("" = off); read by gradecrossing.evaluate
+  webhook_url: ""             # POST each event as JSON here ("" = off)
+  webhook_timeout_seconds: 3.0
+
+output:
+  display: false              # cv2.imshow window (needs a GUI build of OpenCV; q/Esc quits)
+  save_video: ""              # annotated output video path ("" = off), written at processing resolution
+  snapshot_dir: ""            # save an annotated JPEG on every ALARM_START ("" = off)
+  log_level: "INFO"
+  print_every_n_frames: 0     # periodic status line to stdout (0 = off)

@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gradecrossing"
+version = "0.2.0"
+description = "AI rail grade-crossing monitor: stuck-vehicle, pedestrian and debris alerts from a fixed camera"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{ name = "UTRGV USDOT grade-crossing team" }]
+keywords = ["rail", "grade crossing", "computer vision", "yolo", "safety"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+dependencies = [
+    "numpy>=1.24",
+    "opencv-python>=4.8,<5",
+    "ultralytics>=8.3",
+    "pyyaml>=6",
+    "lap>=0.5.12",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+gradecrossing-monitor = "gradecrossing.monitor:main"
+gradecrossing-evaluate = "gradecrossing.evaluate:main"
+
+[project.urls]
+Repository = "https://github.com/Wavy-Hec/usdot-gradecrossing-monitoring"
+
+[tool.setuptools]
+packages = ["gradecrossing"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,6 @@
+# Test dependencies. The suite runs on CPU with synthetic frames; no model download is needed.
+pytest>=7
+# opencv-python-headless replaces opencv-python in CI / on servers without a display
+# (same API minus the GUI). Do not install both: pip keeps whichever came last, and
+# cv2.imshow either works or raises cv2.error, which the monitor handles.
+opencv-python-headless>=4.8,<5

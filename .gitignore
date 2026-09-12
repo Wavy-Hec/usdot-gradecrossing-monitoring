@@ -1,5 +1,32 @@
+# media (test videos live on the GitHub Releases tab)
 *.mov
 *.mp4
+*.avi
+*.mkv
+
+# model weights and exports (keep weights on Releases; see README "Models")
+*.engine
+*.onnx
+runs/
+
+# monitor outputs
+events.jsonl
+snapshots/
+output/
+
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.tmp_verify/
+
+# editors / OS
 .DS_Store
 .ipynb_checkpoints/
-
+.vscode/
+.idea/
