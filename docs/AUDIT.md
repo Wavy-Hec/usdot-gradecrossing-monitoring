@@ -10,27 +10,34 @@ script; the evidence is quoted so anyone can re-check it.
 Cell numbers refer to the notebook **before** the banner cell was added on 2026-09-11 (so "cell
 12" is now the 14th cell). The team's own write-up is `docs/MOG2_YOLO_StressTest_Findings.pdf`.
 
+The findings below are a record of the prototype and are kept as they were written in
+September 2026. The right-hand column of the summary says how the package handles each one
+**as of the October 2026 integration** (commit `36d58bf` and later); where the September fix
+was later replaced, the row says so. The package's own reviews are at the end:
+[September](#review-of-the-package-itself-september-2026) and
+[October](#second-review-october-2026), followed by the [open items](#open-items).
+
 ## Summary
 
-| ID | Severity | Finding | Fixed in package by |
+| ID | Severity | Finding | How the package handles it (October 2026) |
 |---|---|---|---|
-| S1 | critical | Cell 12 alarms the instant any box touches the zone; the vehicle timer and WARNING state are unreachable | `AlertEngine` decides only from per-object `stuck_seconds` / dwell |
-| S2 | critical | No class filter: a train, a pedestrian, a bird, any COCO class counts as a "vehicle" | `DetectorConfig.vehicle_classes`, separate person/train handling |
-| S3 | high | "In zone" means any pixel of the axis-aligned box overlaps the polygon; a pickup on the shoulder is flagged in the team's own snapshot | bottom-center `pointPolygonTest` |
-| S4 | high | No tracking or identity: one global boolean; the timer resets on a single missed detection (13.1 s to 2.8 s on the trapped SUV) | ByteTrack ids, per-object history, grace period |
-| S5 | high | No latch, no alert output: status is drawn on a frame that is discarded | latched ALARM, events to stdout / JSONL / webhook |
-| C1 | critical | MOG2 keeps learning while monitoring; a stationary object disappears from the mask in about 1 s, below the 3 s debris threshold, so the debris alarm is unreachable for stationary debris | `learningRate=0` while monitoring, slow refresh only when the zone is empty |
-| C2 | medium | The exclusion mask is stale on 4 of every 5 frames | detector every frame by default, velocity-propagated boxes otherwise |
-| C3 | medium | Stabiliser anchored to frame 1 forever, no inlier gate, silent fallback to the raw polygon | forward-backward LK, inlier and geometry checks, ORB fallback, hold-last-good, keyframe refresh, HEALTH events |
-| C4 | medium | Shadow pixels are discarded, so dark objects on grey asphalt can be dropped; `varThreshold=50` is about 3x the OpenCV default | configurable; documented limitation |
-| C5 | medium | MOG2 sees the raw frame while only the polygon is warped | documented; zone health gates decisions |
-| T1 | high | Hyperparameter "tuning" never ran: fitness 0.0 in all 100 iterations, defaults committed as `best_hyperparameters.yaml` | `tools/tune_hyperparameters.py` validates data, uses `val=True`, refuses a zero-fitness result |
-| T2 | high | The infrastructure model's headline 0.93 mAP50 is the validation split used for early stopping; held-out test is 0.60 / 0.36 on 45 images | reported honestly in README |
-| T3 | high | Neither vehicle checkpoint is reproducible: both started from an uncommitted `vehicle_tuning/best.pt`, with an uncommitted cfg, on two different datasets; `best_vehicle.pt` is an interrupted epoch-21 snapshot | `tools/train_vehicle.py` writes metrics and copies `data.yaml`; `tools/inspect_checkpoint.py` |
-| T4 | medium | The pipeline never loads any fine-tuned checkpoint; all reported results are COCO yolo11n | `--weights` flag, class lists cover both name sets |
-| E1 | high | No entry point, no requirements, timers are frame counts, capture rewind and exit-on-read-failure are impossible on a live stream | `python -m gradecrossing.monitor`, `requirements.txt`, timestamp-based timers, reconnect |
-| E2 | medium | Every threshold is an absolute pixel count for one 1772x872 clip | fractions of zone area, seconds, px/s |
-| D1 | medium | The write-up's numbers do not match the notebook (961 vs 696 vs 872 debris pixels for the same frame) and its "correct" verdicts are structurally guaranteed by S1 | evaluation harness with ground-truth intervals |
+| S1 | critical | Cell 12 alarms the instant any box touches the zone; the vehicle timer and WARNING state are unreachable | **Fixed.** `AlertEngine` decides only from per-object counters (`stuck_seconds`, `near_stuck_seconds`, dwell): WARNING after 1.5 s stopped, ALARM after 3 s. The notebook itself was corrected in `d75b495`. |
+| S2 | critical | No class filter: a train, a pedestrian, a bird, any COCO class counts as a "vehicle" | **Fixed.** `detector.vehicle_classes` / `person_classes` / `train_classes`; trains never alert; unmapped classes raise no alert, are listed at start-up and stay visible to the debris backstop; `ignore_classes` drops a class. |
+| S3 | high | "In zone" means any pixel of the axis-aligned box overlaps the polygon; a pickup on the shoulder is flagged in the team's own snapshot | **Fixed.** September: bottom-center point test. October: for vehicles, at least 5 % of the bottom quarter of the box (the ground footprint) must overlap the zone; the upper part of a box never counts. Persons, trains and unmapped classes keep the point test. |
+| S4 | high | No tracking or identity: one global boolean; the timer resets on a single missed detection (13.1 s to 2.8 s on the trapped SUV) | **Fixed.** ByteTrack ids, per-object history, track loss only after 2 missed detector runs and 1 s, in-place id re-keying, ID-free still clusters that survive id switches. |
+| S5 | high | No latch, no alert output: status is drawn on a frame that is discarded | **Fixed.** Latched ALARM, WARNING hold, ALARM_UPDATE, events to stdout / JSONL / webhook (retries, `event_id`), RUN_START / RUN_END. |
+| C1 | critical | MOG2 keeps learning while monitoring; a stationary object disappears from the mask in about 1 s, below the 3 s debris threshold, so the debris alarm is unreachable for stationary debris | **Fixed, redesigned in October.** September: `learningRate=0` while monitoring, slow refresh only when the zone had been empty for 5 s. On the team clips that refresh never ran on clip03 and clip06 (never 5 empty seconds), and on clip05 a pickup waiting during the 300-frame warm-up was learned and its ghost latched a debris ALARM twice. Now: classification at rate 0, a box-free 2 s warm-up, and a selective update that only learns pixels that are background, outside boxes and outside candidates. |
+| C2 | medium | The exclusion mask is stale on 4 of every 5 frames | **Fixed.** Detector every frame by default, velocity-propagated boxes otherwise; a covered candidate keeps its age instead of restarting. |
+| C3 | medium | Stabiliser anchored to frame 1 forever, no inlier gate, silent fallback to the raw polygon | **Fixed.** Forward-backward LK, inlier count and fraction, pose sanity checks, a similarity model by default, a temporal gate, ORB fallback, hold-last-good, verified keyframe re-anchoring, registration against a stored calibration image, debounced HEALTH events. |
+| C4 | medium | Shadow pixels are discarded, so dark objects on grey asphalt can be dropped; `varThreshold=50` is about 3x the OpenCV default | **Open (documented).** Configurable (`debris.detect_shadows`, `var_threshold`); still the default behaviour. |
+| C5 | medium | MOG2 sees the raw frame while only the polygon is warped | **Fixed in October.** The debris frame is warped into the calibration geometry with `ZoneState.to_reference`; while the zone is held the debris timers are held. |
+| T1 | high | Hyperparameter "tuning" never ran: fitness 0.0 in all 100 iterations, defaults committed as `best_hyperparameters.yaml` | **Tool fixed.** `tools/tune_hyperparameters.py` validates data, uses `val=True`, finds the run directory ultralytics 8.4 writes, refuses a zero-fitness result. Not rerun. |
+| T2 | high | The infrastructure model's headline 0.93 mAP50 is the validation split used for early stopping; held-out test is 0.60 / 0.36 on 45 images | **Reported** in the README; the gate detector is off by default and not validated on crossing video. |
+| T3 | high | Neither vehicle checkpoint is reproducible: both started from an uncommitted `vehicle_tuning/best.pt`, with an uncommitted cfg, on two different datasets; `best_vehicle.pt` is an interrupted epoch-21 snapshot | **Tools only.** `tools/train_vehicle.py` writes metrics and copies `data.yaml`; `tools/inspect_checkpoint.py` (no torch, refuses unsafe pickles). Not retrained. |
+| T4 | medium | The pipeline never loads any fine-tuned checkpoint; all reported results are COCO yolo11n | **Fixed.** `--weights` flag, class lists cover both name sets. The benchmark still uses COCO `yolo11n.pt`. |
+| E1 | high | No entry point, no requirements, timers are frame counts, capture rewind and exit-on-read-failure are impossible on a live stream | **Fixed.** `python -m gradecrossing.monitor` with exit codes 0/1/2, install extras, timestamp-based timers (container clock for files), reconnect with HEALTH events. |
+| E2 | medium | Every threshold is an absolute pixel count for one 1772x872 clip | **Mostly fixed.** Areas are fractions of the zone or frame, times are seconds; speeds are px/s and a few stabiliser and debris knobs are still in pixels (listed in the README). |
+| D1 | medium | The write-up's numbers do not match the notebook (961 vs 696 vs 872 debris pixels for the same frame) and its "correct" verdicts are structurally guaranteed by S1 | **Fixed.** `gradecrossing.evaluate` scores event logs against ground truth; the advisor's 8 labelled clips are packaged in `benchmarks/team_clips`. |
 
 ## Safety logic
 
@@ -39,7 +46,7 @@ Cell numbers refer to the notebook **before** the banner cell was added on 2026-
 Cell 12, status block:
 
 ```python
-# Status — vehicle in ZOI triggers ALARM immediately
+# Status - vehicle in ZOI triggers ALARM immediately   (an em dash in the original)
 if vehicle_in_zoi:
     status_text  = "ALARM"
     status_color = (0, 0, 255)
@@ -176,7 +183,7 @@ motion the background model compares against a background learned in the origina
 `notebooks/infrastructure tuning best weights/best_hyperparameters.yaml` header:
 
 ```
-# 100/100 iterations complete ✅ (383.41s)
+# 100/100 iterations complete [check-mark emoji] (383.41s)
 # Best fitness=0.0 observed at iteration 1
 # Best fitness metrics are {}
 ```
@@ -274,47 +281,147 @@ Repository hygiene: 27 MB of model binaries at the root (one an unstripped mid-r
 | Synthetic reproduction with OpenCV 4.14 | C1 |
 | GitHub release metadata of the upstream repository | T3, datasets |
 
-## Review of the package itself
+## Review of the package itself (September 2026)
 
 The new package was reviewed the same way (one independent review pass over every module, each
 candidate defect confirmed by re-reading the code path or running a probe script). Eight defects
 were confirmed and fixed before this document was finalised; they are worth knowing about because
-they show where the remaining risk is:
+they show where the remaining risk is. Notes in brackets say what changed later.
 
 - A ByteTrack id change on a stationary vehicle (re-identification after an occlusion) reset its
   stuck clock. Fixed: a new id whose box overlaps an unclaimed live track inherits that track.
+  [October: only a vehicle box may adopt a *stopped* vehicle track (and a person box a person
+  track), the clocks go back if the old id returns, and ID-free still clusters bridge the id
+  switches the re-keying cannot match.]
 - A stationary object with a class in none of the configured lists raised nothing and was learned
   into the background. Partly fixed: it now blocks the background refresh and the detector warns
   about unmapped class names at start-up; it still raises no alert. Map every class that can
-  obstruct a crossing.
+  obstruct a crossing. [October: the empty-zone refresh no longer exists; instead the debris
+  backstop excludes only vehicle, person and train boxes, so an unmapped object stays visible to
+  it and alarms after `persist_seconds`. It still raises no vehicle alert.]
 - The debris timer had no immobility test, so an undetected moving object (a train under weights
   with no `train` class) tripped a debris alarm after `persist_seconds`. Fixed: the candidate's
-  pixels and footprint must both be static for the timer to advance.
+  pixels and footprint must both be static for the timer to advance. [October: per-pixel ages
+  plus a content test against a frame 0.5 s old replace the footprint test, which broke
+  flickering low-contrast objects; a train box over the zone holds the timers.]
 - A sudden global illumination step latched a permanent "debris 100 % of zone" alarm. Fixed:
   foreground covering more than `debris.max_area_fraction` of an empty zone *and* of the frame
   outside it is treated as an illumination step; the model re-warms and a HEALTH event is logged.
+  [October: a gain measured outside the zone is divided out first; the re-warm no longer needs
+  an empty zone, and never runs while debris is triggered.]
 - One transient exception inside a frame ended the whole run. Fixed: the frame is skipped and
   counted; only five consecutive failures stop the loop.
 - Malformed YAML produced a traceback and exit 1 instead of the documented exit 2. Fixed.
 - `requires-python` was 3.9 although the code is 3.8-clean (JetPack 5 ships 3.8). Lowered, but
-  only syntax-checked: run the suite once on the Jetson's own interpreter.
+  only syntax-checked: run the suite once on the Jetson's own interpreter. [Since then the suite
+  has been run on Python 3.8.20 and 3.9.25 as well as 3.12 (in October: 169 passed, 3 skipped on
+  each of 3.8.20 and 3.9.25, before the October changes); it has still never run on a Jetson.]
 - One test opened a real window on GUI builds of OpenCV. Fixed.
 
 Two hardenings were added on top: the background refresh is also refused while any candidate
 debris streak is in progress (not only after it has triggered), and an LK estimate must keep at
 least `zone.min_inlier_fraction` of the reference features as inliers, not just an absolute count.
+[October: the first is superseded by the selective update; the second is kept.]
 
-## Open items the package does not close
+## Second review (October 2026)
 
-- No evaluation on real footage yet: every package test uses synthetic scenes. The evaluation
-  harness exists; the labelled event set does not. All new thresholds (`max_area_fraction`,
-  `static_motion_*`, `min_inlier_fraction`) are reasoned defaults, not measured ones.
-- The illumination-step guard cannot fire once a debris streak has begun, so a lighting step that
-  lands while small debris is accumulating persistence is still treated as debris.
-- The infrastructure detector's gate-down class is the weakest one it has (mAP50 0.48 on test);
-  gate state is a threshold modifier, not a hard gate, for that reason.
+In October 2026 the package was reviewed again, this time against the team's own work since
+April (the advisor's occupancy monitor, his 8 labelled clips with zones and ground truth, the
+team's experiments on the vehicle rule) and on real footage: the package was run on those
+clips for the first time. The verified findings were fixed on nine branches, merged at
+`36d58bf`. In short:
+
+- **The package missed every positive.** At `ae66b8f` the 8 clips gave 0 / 3 ALARMs and 0 / 3
+  WARNINGs with 7 false alarms: the bottom-center point test misses vehicles seen obliquely
+  across the thin zones, the speed clock restarted on every id switch and box change (nine
+  restarts for clip01's SUV), and the 8 s ALARM was longer than the task definition (3 s) and
+  than the trapped-van event. The vehicle rule was replaced by a port of the team's measured
+  rule: footprint overlap >= 5 %, a near-the-tracks WARNING, stopped = speed OR still cluster,
+  WARNING 1.5 s / ALARM 3 s (provisional), plus a WARNING hold, ALARM_UPDATE, hidden hazards
+  behind trains, track loss only on detector runs, strict re-keying, label hold and
+  camera-motion compensation. `configs/legacy_rule.yaml` rolls the rule back.
+- **The zone could jump while reported healthy** (the 8-DOF homography fitted the minority of
+  points a passing train leaves: single-frame jumps of 5-14 px on clip03 and 45-64 px on
+  clip02). Now a similarity model, a temporal gate, a dead-zone, verified re-anchors,
+  `ZoneState.to_reference`, calibration geometry (`reference_size`, `reference_image`
+  registration), featureless start-up handling and debounced HEALTH events. A zone that does
+  not fit the stream's aspect ratio is refused (exit 2).
+- **The debris path was part of 3 of the 7 false-alarm episodes** and could not learn on a
+  busy crossing (C1 above). It was redesigned: box-free warm-up, selective update, registration to
+  the calibration frame, per-pixel persistence with occlusion bridging, gain compensation, a
+  train hold and ghost healing. On the clips it now raises no false alarm.
+- **The CLI exited 0 after aborting** (missing weights, no ultralytics, a wrong-typed value):
+  the exit status is now 0 / 1 / 2 by whether the crossing was watched, every run is framed by
+  RUN_START / RUN_END, stream loss, reconnects, aborts and failed outputs are HEALTH events,
+  `FrameResult.degraded` says when the monitor is partly blind, a pipeline reset closes an open
+  episode with an END event, and file frames are timestamped with the container clock
+  (clip01 is a variable-frame-rate file).
+- **Config values were not type-checked** (`vehicle_classes: car` silently disabled every
+  vehicle alarm): values are now checked against their field types and shapes; the team's zone
+  files load directly (`zone.polygon_file`, `--zone`).
+- **Evaluation could not use the team's ground truth**: it now reads the team JSON format,
+  matches with the team's rules or one-to-one, scores batches and runs, and reports
+  FA-seconds and WARNING-or-ALARM metrics; the clips are packaged in `benchmarks/team_clips`
+  with a downloader and a runner. The webhook retries with an `event_id` for de-duplication.
+- **Packaging installed two OpenCV builds** and forced torch on evaluate-only users: each
+  install now has exactly one OpenCV build (headless by default), the base install is
+  torch-free, and editable installs work with pip 20.0.2 (JetPack 5's).
+- Tools: the tuning script finds ultralytics 8.4 run directories, the checkpoint inspector no
+  longer unpickles arbitrary code, `calibrate_zone.py` writes minimal site configs.
+
+Measured on the 8 clips (COCO `yolo11n.pt`, the team's scoring rules; details in the README):
+
+| | `ae66b8f` | October 2026 |
+|---|---|---|
+| ALARM recall | 0 / 3 | 3 / 3 (clip01 3.48 s, clip07 3.31 s, clip08 2.54 s) |
+| WARNING-or-ALARM recall | 0 / 3 | 3 / 3 (2.01 s, 1.80 s, 1.04 s) |
+| false ALARM episodes | 7 (53.0 / h) | 5 (37.9 / h) |
+| false ALARM seconds | 154.1 | 256.4 |
+| WARNING-or-ALARM false seconds | 190.1 | 359.8 |
+| false alarms involving debris | 3 | 0 |
+| HEALTH events | 0 | 31 (3-5 per clip) |
+
+With 3 positives (two of them the same event) these numbers describe behaviour, not rates.
+
+## Open items
+
+Not closed by the package as of the October 2026 integration:
+
+- **Evaluation data.** 8 clips, 7.9 minutes, 3 positives. The WARNING 1.5 s / ALARM 3 s policy,
+  the near-the-tracks WARNING and the new thresholds rest on this set and on the team's
+  experiments; the team has to confirm them, and a larger set (hours of normal traffic, night,
+  rain, more positives) is needed before rates can be quoted.
+- **Remaining false alarms.** All five are cars or a truck waiting at the gates inside the thin
+  hand-drawn zones while the gates are down. No rule change separates a car waiting inside the
+  zone from one stopped on the rails; the zones need a per-site review.
+- **Hidden-hazard memory** (`stuck.occlusion_memory_seconds`, 3 s) holds those false alarms
+  through the train passage: 198.2 s of false ALARM without it, 256.4 s with it (7 episodes
+  merged into 5), no true alarm changed. Keeping it is a team decision.
+- **Gate state.** The infrastructure detector's gate-down class is its weakest (test mAP50
+  0.48) and it is not validated on crossing video; `infrastructure.enabled` is false, and with
+  the 3 s ALARM gates down no longer shortens the stuck ALARM.
+- **Debris backstop.** An undetected obstruction already on the crossing while the model warms
+  up (start-up or a re-warm) is learned as background; partly visible dark objects of a few
+  hundred pixels fall under the size bar; the train hold relies on the `train` label; the
+  texture test treats texture-preserving changes (a wet patch, a transparent sheet) as
+  lighting; shadows are still dropped (C4).
+- **Zone.** The similarity model approximates a real perspective change (about 3 px at the far
+  end of clip02's band after its view shift); `motion_model: homography` is available but holds
+  more often on trains.
+- **Operations.** SIGTERM and SIGHUP now stop a run like Ctrl-C (RUN_END, webhook drain,
+  exit 0), but the test that sends a real SIGTERM to a subprocess runs only on POSIX and has
+  not been run on the Jetson. The webhook drain at shutdown can take up to 30 s on a slow
+  endpoint, longer than Docker's default 10 s stop timeout. `python -m gradecrossing.monitor`
+  without OpenCV still fails with an import traceback (only the `gradecrossing-monitor`
+  script names the extra to install). A live stream that changes aspect ratio and is still
+  accepted by the calibration (within 1 % of `zone.reference_size`) re-learns the debris
+  background with whatever is in view, so a debris ALARM then ends with its latch unless
+  something raises it again. The live path (reconnect, stream timeouts, wall-clock
+  timestamps, a stream that changes resolution) is tested with fake captures and a refused
+  local URL only; no real RTSP camera has been used.
+- **Jetson.** Never run on the hardware. The `[detector]` extra needs a newer pip than
+  JetPack's 20.0.2 for one aarch64 wheel, and Ultralytics' Jetson guide pins a numpy older than
+  this package's floor; both are reasoned from package metadata, not tried.
 - Speeds are in pixels per second unless a per-site ground-plane homography is configured.
 - The fine-tuned vehicle weights remain unreproduced until `tools/train_vehicle.py` is rerun with
-  a committed `data.yaml`.
-- The live-stream path (RTSP reconnect, wall-clock timestamps) has no test coverage because no
-  live source was available; only the file path is exercised.
+  a committed `data.yaml` (T3).
