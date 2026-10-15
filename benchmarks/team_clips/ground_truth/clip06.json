@@ -1,0 +1,22 @@
+{
+ "video": "clip06",
+ "duration": 110.01,
+ "container_duration": 113.8,
+ "events": [
+  {
+   "start": 10,
+   "end": 110,
+   "should_alarm": false,
+   "note": "gates down",
+   "detail": "lowered, and until the arms are fully raised again (checked on frames)"
+  },
+  {
+   "start": 38.0,
+   "end": 113.8,
+   "should_alarm": false,
+   "note": "car waiting at the gate, in front of the zone (occludes it in the image)"
+  }
+ ],
+ "note": "normal operation with an occluding car",
+ "ignore": []
+}

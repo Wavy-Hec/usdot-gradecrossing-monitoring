@@ -23,10 +23,8 @@ from gradecrossing.alerting import (
     build_sinks,
     event_to_json,
 )
-from gradecrossing.config import AlertConfig, DebrisConfig, StuckConfig
+from gradecrossing.config import AlertConfig, StuckConfig
 from gradecrossing.types import DebrisResult, Event, GateState, ObjectState, Status
-
-np.random.seed(0)
 
 
 # --------------------------------------------------------------------------------------
@@ -76,10 +74,12 @@ def make_gate(down: bool = False) -> GateState:
                      last_update=0.0, last_seen_down=0.0 if down else None, available=True)
 
 
-def make_engine(latch: float = 10.0, repeat: float = 0.0, **stuck_overrides) -> AlertEngine:
-    stuck = StuckConfig(**stuck_overrides)
-    alerts = AlertConfig(latch_seconds=latch, repeat_notify_seconds=repeat, stdout=False)
-    return AlertEngine(stuck, DebrisConfig(), alerts)
+def make_engine(latch: float = 10.0, repeat: float = 0.0, hold: float = 0.0, **stuck_overrides) -> AlertEngine:
+    """Engine with the pre-port 3 s / 8 s stuck timing pinned (these tests were written for it;
+    the shipped 1.5 s / 3 s defaults are pinned in tests/test_rules_alerting.py) and no WARNING hold."""
+    stuck = StuckConfig(**{"warning_seconds": 3.0, "alarm_seconds": 8.0, **stuck_overrides})
+    alerts = AlertConfig(latch_seconds=latch, repeat_notify_seconds=repeat, warning_hold_seconds=hold, stdout=False)
+    return AlertEngine(stuck, alerts)
 
 
 def collect(engine: AlertEngine) -> List[Event]:
@@ -188,7 +188,10 @@ def test_latch_holds_alarm_then_releases():
     assert a.latched_until is None
     assert a.reasons == []
     assert [e.type for e in ev] == ["ALARM_END"]
-    assert ev[0].track_ids == []
+    # The END event names what ended: the episode's ids and the reason that opened it (it
+    # used to carry the previous frame's raw ids, [] after a latch).
+    assert ev[0].track_ids == [7]
+    assert ev[0].reasons == ["vehicle 7 (car) stationary in zone 9.0s"]
     assert [e.type for e in events] == ["ALARM_START", "ALARM_END"]
     assert events[0].track_ids == [7]
 
@@ -308,7 +311,9 @@ def test_event_sequence_warning_then_alarm_then_clear():
     assert [e.frame_index for e in events] == [120, 270, 270, 300]
     assert events[1].track_ids == [7]  # WARNING_END carries the ids that were warning
     assert events[3].track_ids == [7]  # ALARM_END carries the ids that were alarming
-    assert all(e.extra == {} for e in events)
+    # Transition events describe the objects involved (they used to carry an empty extra).
+    assert [[o["id"] for o in e.extra["objects"]] for e in events] == [[7], [7], [7], []]
+    assert all("repeat" not in e.extra for e in events)
 
 
 def test_warning_start_end_without_alarm():
@@ -329,7 +334,7 @@ def test_repeat_notify():
         eng.evaluate([make_obj(7, stuck=9.0 + t, dwell=9.0 + t)], None, gate, t, i)
     starts = [e for e in events if e.type == "ALARM_START"]
     assert len(starts) == 3
-    assert starts[0].extra == {}
+    assert "repeat" not in starts[0].extra
     assert [e.timestamp for e in starts[1:]] == [5.0, 10.0]
     assert all(e.extra == {"repeat": True} for e in starts[1:])
     assert all(e.track_ids == [7] for e in starts)
@@ -410,27 +415,29 @@ def test_jsonl_sink_writes_valid_json_lines(tmp_path):
     eng.evaluate([make_obj(np.int64(7), stuck=1.5, dwell=1.5)], None, gate, 1.5, 45)  # WARNING
     eng.evaluate([make_obj(np.int64(7), stuck=3.5, dwell=3.5)], None, gate, 3.5, 105)  # ALARM
     eng.evaluate([make_obj(np.int64(7), stuck=5.5, dwell=5.5)], None, gate, 5.5, 165)  # repeat
-    eng.evaluate([], make_debris(True), gate, 6.0, 180)  # still ALARM (debris), no event
+    eng.evaluate([], make_debris(True), gate, 6.0, 180)  # still ALARM; debris is a new cause: ALARM_UPDATE
     eng.evaluate([], None, gate, 7.0, 210)  # ALARM_END
     sink.close()
 
     lines = path.read_text(encoding="utf-8").splitlines()
-    assert len(lines) == 5 == sink.count
+    assert len(lines) == 6 == sink.count
     records = [json.loads(line) for line in lines]
-    assert [r["type"] for r in records] == ["WARNING_START", "WARNING_END", "ALARM_START", "ALARM_START", "ALARM_END"]
+    assert [r["type"] for r in records] == ["WARNING_START", "WARNING_END", "ALARM_START", "ALARM_START",
+                                            "ALARM_UPDATE", "ALARM_END"]
     assert set(records[0]) == {"type", "timestamp", "frame_index", "status", "reasons", "track_ids", "extra"}
     assert records[2]["track_ids"] == [7]
     assert records[2]["status"] == "ALARM"
     assert records[2]["reasons"] == ["vehicle 7 (car) stationary in zone 3.5s (gates down)"]
     assert records[3]["extra"] == {"repeat": True}
-    assert records[4]["status"] == "CLEAR"
+    assert records[4]["extra"]["new_reasons"] == ["debris 4.1% of zone for 3.2s"]
+    assert records[5]["status"] == "CLEAR"
     # append mode: a second sink on the same path keeps the earlier lines
     with JsonlSink(str(path)) as sink2:
         sink2.emit(Event("HEALTH", 8.0, 240, "CLEAR", ["stabilizer unhealthy"], [], {"inliers": 3}))
-    assert len(path.read_text(encoding="utf-8").splitlines()) == 6
+    assert len(path.read_text(encoding="utf-8").splitlines()) == 7
     # emitting after close is logged, not raised
     sink.emit(Event("HEALTH", 9.0, 270, "CLEAR", [], [], {}))
-    assert sink.count == 5
+    assert sink.count == 6
 
 
 def test_stdout_sink_prints_ascii_line(capsys):
@@ -499,7 +506,7 @@ def local_server():
     _Recorder.delay_s = 0.0
     _Recorder.received = threading.Event()
     srv = http.server.HTTPServer(("127.0.0.1", 0), _Recorder)
-    th = threading.Thread(target=srv.serve_forever, daemon=True)
+    th = threading.Thread(target=srv.serve_forever, kwargs={"poll_interval": 0.05}, daemon=True)
     th.start()
     try:
         yield f"http://127.0.0.1:{srv.server_address[1]}/hook"
@@ -551,7 +558,7 @@ def test_webhook_sink_failure_is_logged_not_raised(caplog):
     assert bad.failures == 1
 
 
-def test_webhook_sink_drops_when_queue_full(caplog):
+def test_webhook_sink_drops_when_queue_full():
     import socket
     s = socket.socket()
     s.bind(("127.0.0.1", 0))

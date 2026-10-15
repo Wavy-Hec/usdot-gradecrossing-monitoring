@@ -5,12 +5,18 @@
 *.mkv
 
 # model weights and exports (keep weights on Releases; see README "Models")
+# ultralytics downloads yolo11n.pt & co. into the working directory, i.e. the repo root for
+# the README commands; the weights the team committed there stay tracked.
+/*.pt
+!/50_epochs_best.pt
+!/best_vehicle.pt
 *.engine
 *.onnx
 runs/
 
-# monitor outputs
+# monitor / benchmark outputs
 events.jsonl
+*.events.jsonl
 snapshots/
 output/
 
@@ -18,12 +24,13 @@ output/
 __pycache__/
 *.pyc
 .pytest_cache/
+.coverage
+htmlcov/
 .venv/
 venv/
 *.egg-info/
 build/
 dist/
-.tmp_verify/
 
 # editors / OS
 .DS_Store

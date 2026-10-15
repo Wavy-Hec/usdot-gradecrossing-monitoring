@@ -1,0 +1,29 @@
+# Approximation of the advisor's pipelines/yolo_only rule ("merged" policy) for comparisons:
+# ALARM when a vehicle's box keeps re-appearing at IoU >= 0.5 where it first stood (ID-free)
+# for 3 s, on the tracks (bottom-quarter footprint >= 5 % in the zone) OR too close to them
+# (within 0.75 box heights). Merge it under a site config:
+#
+#   python -m gradecrossing.monitor --config configs/team_rule.yaml --source ...
+#
+# It is NOT a reproduction of the team's E8 numbers. What still differs:
+# - boxes: ours come from ByteTrack (Kalman-smoothed, confirmed tracks only, NMS iou 0.7 here);
+#   the advisor feeds raw model.predict boxes at the ultralytics defaults;
+# - the on/near relation is decided per frame (with a 0.5 s exit debounce), not on the
+#   median box of the finished cluster;
+# - a cluster's anchor moves once, to its owner's box where the speed first drops below
+#   stuck.speed_threshold (the advisor keeps the first box);
+# - detect_every_n_frames 6 is 5 fps only for 30 fps sources (use 5 for 25 fps sources; the
+#   advisor uses round(fps / 5));
+# - our latch, repeat, dwell, person and gates-down tiers stay on; debris is off.
+detector:
+  imgsz: 960
+  iou: 0.7
+  detect_every_n_frames: 6
+stuck:
+  stationarity: "still"
+  still_border_margin: 0.0         # the advisor's clusters take boxes at the image border too
+  close_policy: "alarm"
+  alarm_seconds: 3.0
+  warning_seconds: 1.5
+debris:
+  enabled: false

@@ -1,0 +1,41 @@
+# Rollback profile: the vehicle decision rule as it was before the YOLO-geometry port
+# (commit ae66b8f): bottom-center point test, speed-only stationarity, no "too close" tier,
+# immediate zone exit, WARNING 3 s / ALARM 8 s, any-class id re-keying, per-frame labels,
+# no hidden hazards, raw image coordinates, no WARNING hold, ByteTrack fed at conf, a lost
+# track dropped at the first missed detector run. (Fixes that are not rule changes stay on:
+# skipped detector frames never age a track out - ae66b8f dropped every track between
+# runs when detect_every_n_frames spanned more than the grace.)
+#
+#   python -m gradecrossing.monitor --config configs/legacy_rule.yaml --source ...
+#
+# Merge it under a site config (only the keys below differ from the defaults). It restores
+# the VEHICLE RULE exactly: tests/test_legacy_profile.py checks that every behavioural key
+# the port changed is set here and replays the ae66b8f test scenarios against goldens
+# recorded from that commit. The rest of the pipeline keeps its new behaviour - the zone
+# stabiliser, the debris backstop and the container-clock timestamps are code, not keys -
+# so whole-pipeline events differ from ae66b8f. Measured on the 8 team clips at 36d58bf
+# (harness run docs-final_legacy): recall 0/3, 7 false alarms, 136.2 s of false ALARM,
+# 182.1 s of false WARNING or ALARM, 14 warnings outside positives (ae66b8f: 0/3, 7, 154.1 s,
+# 190.1 s, 13). The vehicle ALARM episodes are those of ae66b8f; the debris-raised ones are
+# not (clip02's second ALARM starts at 60.73 s on vehicle 853 instead of 56.82 s on debris;
+# clip05 has vehicle ALARMs 26.79-41.07 s and 86.85-97.00 s instead of debris ALARMs
+# 16.98-41.57 s and 83.15-97.00 s). No key brings those back: a full-pipeline comparison
+# needs ae66b8f itself. Event payloads keep the newer format (END events carry the
+# episode's ids, ALARM_UPDATE announces new causes).
+detector:
+  track_conf: null                  # = conf: ByteTrack gets exactly the boxes it got before
+stuck:
+  warning_seconds: 3.0
+  alarm_seconds: 8.0
+  zone_test: "bottom_center"
+  close_policy: "off"
+  zone_exit_grace_seconds: 0.0
+  stationarity: "speed"
+  rekey_policy: "any"
+  lost_track_missed_runs: 1        # dropped at the first missed detector run once the grace has passed
+  undetected_clock_while_live: false  # a missed vehicle's clocks freeze until it is seen again
+  label_hold_seconds: 0.0
+  occlusion_memory_seconds: 0.0
+  camera_motion_compensation: false
+alerts:
+  warning_hold_seconds: 0.0

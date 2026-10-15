@@ -37,8 +37,8 @@ from .types import Detection, GateState
 
 LOGGER = logging.getLogger(__name__)
 
-# Categories returned by VehicleDetector.classify. Kept as constants so the tracker and the
-# alert engine compare against the same strings.
+# Categories returned by VehicleDetector.classify and ConfigClassifier. Defined only here:
+# the tracker and the monitor import them, so every module compares the same strings.
 CATEGORY_VEHICLE = "vehicle"
 CATEGORY_PERSON = "person"
 CATEGORY_TRAIN = "train"
@@ -48,10 +48,45 @@ CATEGORY_OTHER = "other"
 # not present locally (e.g. the default ``yolo11n.pt``). Anything else that is missing is an error.
 _OFFICIAL_ASSET_RE = re.compile(r"^(yolo|rtdetr|sam|fastsam|mobile_sam)[a-z0-9_\-.]*\.pt$", re.IGNORECASE)
 
+# How to get ultralytics without breaking OpenCV. A bare `pip install ultralytics` pulls the GUI
+# opencv-python on top of the opencv-python-headless that [detector]/[headless] installed; both
+# unpack into one cv2/ directory (see pyproject.toml), so the advice names the extras instead.
+ULTRALYTICS_INSTALL_HINT = (
+    "from a checkout: pip install \".[detector]\" (headless OpenCV: Jetson, Colab, servers; same as "
+    "requirements.txt) or \".[display]\" (GUI OpenCV; requirements-display.txt), not a bare "
+    "'pip install ultralytics', which adds the GUI opencv-python next to the headless one; on a Jetson "
+    "install NVIDIA's torch wheel for your JetPack first")
+
 
 def _normalise_name(name: Any) -> str:
     """Lower-case, whitespace-stripped class name used for all case-insensitive comparisons."""
     return str(name).strip().lower()
+
+
+class ConfigClassifier:
+    """``cls_name -> "vehicle" | "person" | "train" | "other"`` from ``DetectorConfig`` lists.
+
+    The one implementation of the class mapping (case-insensitive membership, surrounding
+    whitespace ignored): :meth:`VehicleDetector.classify` delegates to it, and the monitor
+    uses it directly so the tracker can be built before the detector exists (the detector
+    is loaded lazily) and injected fake detectors without a ``classify`` method still get
+    the configured mapping. It needs no model, so it never imports torch.
+    """
+
+    def __init__(self, cfg: DetectorConfig) -> None:
+        self._vehicle = {_normalise_name(n) for n in cfg.vehicle_classes}
+        self._person = {_normalise_name(n) for n in cfg.person_classes}
+        self._train = {_normalise_name(n) for n in cfg.train_classes}
+
+    def __call__(self, cls_name: str) -> str:
+        key = _normalise_name(cls_name)
+        if key in self._vehicle:
+            return CATEGORY_VEHICLE
+        if key in self._person:
+            return CATEGORY_PERSON
+        if key in self._train:
+            return CATEGORY_TRAIN
+        return CATEGORY_OTHER
 
 
 def _to_numpy(value: Any) -> Optional[np.ndarray]:
@@ -89,14 +124,15 @@ def load_yolo(weights: str, task: str = "detect") -> Any:
                 f"weights file not found: '{weights_str}' (cwd={os.getcwd()}). "
                 "Only official ultralytics asset names such as 'yolo11n.pt' are auto-downloaded."
             )
-        LOGGER.warning("weights '%s' not found locally; ultralytics will try to download them", weights_str)
     try:
         from ultralytics import YOLO  # local import: keep torch out of the package import graph
     except ImportError as exc:  # pragma: no cover - exercised only on machines without ultralytics
         raise ImportError(
-            "ultralytics is required for the YOLO detectors (pip install ultralytics plus a torch "
-            "build for your platform). Every other gradecrossing module works without it."
+            f"ultralytics is required for the YOLO detectors ({ULTRALYTICS_INSTALL_HINT}). "
+            "Every other gradecrossing module works without it."
         ) from exc
+    if not path.exists():  # only now: without ultralytics nothing would be downloaded
+        LOGGER.warning("weights '%s' not found locally; ultralytics will try to download them", weights_str)
     LOGGER.info("loading YOLO weights %s (task=%s)", weights_str, task)
     return YOLO(weights_str, task=task)
 
@@ -212,33 +248,56 @@ class VehicleDetector(_YoloBase):
     to ``"vehicle" | "person" | "train" | "other"`` using the case-insensitive lists in the config,
     which is how COCO names (``car``) and the fine-tuned CCTV names (``Car``, ``Jeep``) are treated
     alike.
+
+    Thresholds: the tracker gets every box scoring at least ``cfg.track_conf`` (``cfg.conf`` when
+    unset). Set lower (0.1), it feeds ByteTrack's second association stage, which only uses boxes
+    between its low and high thresholds (0.1-0.25) to keep a partly occluded vehicle on its id;
+    new tracks still start only from boxes above ByteTrack's own ``new_track_thresh``. ``cfg.conf``
+    stays the decision threshold where the tracker is not used: plain detection, and boxes the
+    tracker hands back without an id (ultralytics returns the raw boxes when no track is active).
+    Boxes of ``cfg.ignore_classes`` are dropped.
     """
+
+    @staticmethod
+    def check_config(cfg: DetectorConfig) -> None:
+        """Raise ``ValueError`` for detector settings that can never work (scores outside (0, 1]).
+
+        Called by the constructor and by ``Monitor.__init__``, which builds the detector only
+        on the first frame: a bad value is reported before any frame is read, like the
+        tracker's and the alert engine's settings.
+        """
+        for key in ("conf", "track_conf"):
+            value = getattr(cfg, key)
+            if (value is not None or key == "conf") and not 0.0 < float(value) <= 1.0:
+                raise ValueError(f"detector.{key} must be in (0, 1], got {value!r}")
 
     def __init__(self, cfg: DetectorConfig, model: Optional[Any] = None) -> None:
         self.cfg = cfg
+        self.check_config(cfg)
         super().__init__(cfg.weights, cfg.device, cfg.half, model=model)
-        self._vehicle = {_normalise_name(n) for n in cfg.vehicle_classes}
-        self._person = {_normalise_name(n) for n in cfg.person_classes}
-        self._train = {_normalise_name(n) for n in cfg.train_classes}
+        self._classifier = ConfigClassifier(cfg)
+        self._ignore = {_normalise_name(n) for n in cfg.ignore_classes}
         if cfg.detect_every_n_frames > 1 and not cfg.tracker:
             LOGGER.warning(
                 "detect_every_n_frames=%d without a tracker: skipped frames rely on the IoU fallback",
                 cfg.detect_every_n_frames,
             )
-        unknown = [n for n in self._names.values() if self.classify(n) == CATEGORY_OTHER]
+        unknown = [n for n in self._names.values()
+                   if self.classify(n) == CATEGORY_OTHER and _normalise_name(n) not in self._ignore]
         if unknown:
-            # Deliberately a warning, once, at start-up: an unmapped class is a blind spot,
-            # not a detail. Such a box never feeds the stuck/pedestrian logic *and* is still
-            # subtracted from the debris mask, so a stationary obstruction the model labels
-            # with one of these names raises nothing at all. It does block the empty-zone
-            # background refresh (tracking.StuckVehicleTracker.zone_occupied), which is the
-            # only protection left. Map anything that can obstruct a crossing into
-            # detector.vehicle_classes / person_classes.
+            # Deliberately a warning, once, at start-up: an unmapped class is a blind spot of
+            # the vehicle and pedestrian rules - such a box never feeds the stuck/pedestrian
+            # logic. It is *not* excluded from the debris mask (the monitor excludes vehicle,
+            # person and train boxes only, plus a track that carried one of those labels in
+            # the last few seconds), so a stationary obstruction with one of these labels is
+            # left to the debris backstop: it alarms only after debris.persist_seconds, and
+            # only where the background model has seen the crossing box-free. Map anything
+            # that can obstruct a crossing into detector.vehicle_classes / person_classes.
             LOGGER.warning(
                 "model classes not mapped to vehicle/person/train: %s - objects of these "
-                "classes raise no WARNING/ALARM and are excluded from the debris mask; add "
-                "the ones that can obstruct the crossing to detector.vehicle_classes or "
-                "detector.person_classes", unknown)
+                "classes raise no vehicle/person WARNING/ALARM (only the debris backstop sees "
+                "them); add the ones that can obstruct the crossing to "
+                "detector.vehicle_classes or detector.person_classes", unknown)
 
     def detect(self, frame_bgr: np.ndarray) -> List[Detection]:
         """Detect (and track) objects in one BGR frame.
@@ -247,15 +306,25 @@ class VehicleDetector(_YoloBase):
         the model. Track ids are only meaningful when consecutive frames of the same video are
         fed in order; call :meth:`reset` when switching videos.
         """
+        tracking = bool(self.cfg.tracker)
+        conf = float(self.cfg.track_conf if tracking and self.cfg.track_conf is not None else self.cfg.conf)
         results = self._infer(
             frame_bgr,
             tracker=self.cfg.tracker,
-            conf=self.cfg.conf,
+            conf=conf,
             imgsz=self.cfg.imgsz,
             iou=self.cfg.iou,
             max_det=self.cfg.max_det,
         )
-        return results_to_detections(results, self._names)
+        detections = results_to_detections(results, self._names)
+        decide = float(self.cfg.conf)
+        if tracking and conf < decide:
+            # A box without an id did not go through the tracker's thresholds: it is a plain
+            # detection, so the plain detection threshold applies.
+            detections = [d for d in detections if d.track_id is not None or d.conf >= decide]
+        if self._ignore:
+            detections = [d for d in detections if _normalise_name(d.cls_name) not in self._ignore]
+        return detections
 
     def reset(self) -> None:
         """Forget all tracks (new video / after a reconnect).
@@ -277,15 +346,9 @@ class VehicleDetector(_YoloBase):
 
         Trains are deliberately their own category: a train in the zone is normal and must never
         feed the stuck-vehicle timers, yet its box still has to be excluded from the debris mask.
+        The rule itself is :class:`ConfigClassifier`.
         """
-        key = _normalise_name(cls_name)
-        if key in self._vehicle:
-            return CATEGORY_VEHICLE
-        if key in self._person:
-            return CATEGORY_PERSON
-        if key in self._train:
-            return CATEGORY_TRAIN
-        return CATEGORY_OTHER
+        return self._classifier(cls_name)
 
 
 class InfrastructureDetector(_YoloBase):
@@ -370,6 +433,7 @@ __all__ = [
     "CATEGORY_PERSON",
     "CATEGORY_TRAIN",
     "CATEGORY_VEHICLE",
+    "ConfigClassifier",
     "InfrastructureDetector",
     "VehicleDetector",
     "load_yolo",

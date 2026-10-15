@@ -1,0 +1,20 @@
+{
+ "video": "clip08",
+ "duration": 8.041,
+ "container_duration": 8.7,
+ "events": [
+  {
+   "start": 3.3,
+   "end": 6.2,
+   "label": "vehicle",
+   "should_alarm": true,
+   "note": "same van, second camera"
+  }
+ ],
+ "ignore": [
+  [
+   6.2,
+   8.7
+  ]
+ ]
+}

@@ -34,11 +34,6 @@ class Detection:
         return ((x1 + x2) / 2.0, y2)
 
     @property
-    def center(self) -> Tuple[float, float]:
-        x1, y1, x2, y2 = [float(v) for v in self.xyxy]
-        return ((x1 + x2) / 2.0, (y1 + y2) / 2.0)
-
-    @property
     def height(self) -> float:
         return float(self.xyxy[3] - self.xyxy[1])
 
@@ -55,9 +50,15 @@ class ZoneState:
     mask: np.ndarray  # HxW uint8, 255 inside the polygon
     homography: Optional[np.ndarray]  # 3x3 reference->current, None if identity/held
     inliers: int  # RANSAC inlier count (0 if none computed)
-    method: str  # "identity" | "lk" | "orb" | "held"
+    method: str  # "identity" | "lk" | "orb" | "held" | "uninitialized"
     healthy: bool  # True when the estimate met the inlier/geometry sanity checks
     area_px: int = 0
+    # 3x3 float64 mapping pixels of the CURRENT processed frame to pixels of the original
+    # reference (calibration) frame, composed across keyframe re-anchors and never
+    # dead-zoned; the last accepted value while holding; None until the zone is initialised
+    # (method "uninitialized", healthy False, while the first frames are featureless).
+    # ``homography`` above is relative to the current keyframe, not to this reference.
+    to_reference: Optional[np.ndarray] = None
 
 
 @dataclass
@@ -78,8 +79,20 @@ class ObjectState:
     speed: float  # current speed estimate (px/s, or m/s when ground homography is set)
     speed_units: str  # "px/s" | "m/s"
     stationary_seconds: float  # continuous seconds with speed < threshold (any location)
-    stuck_seconds: float  # continuous seconds simultaneously in_zone AND below speed threshold
-    history: List[Tuple[float, float, float]] = field(default_factory=list)  # (t, x, y) bottom-center
+    stuck_seconds: float  # continuous seconds simultaneously in_zone AND stopped (see StuckConfig.stationarity)
+    # (t, x, y) bottom-center samples of the speed window; reference-frame pixels when the
+    # zone provides ZoneState.to_reference, image pixels otherwise
+    history: List[Tuple[float, float, float]] = field(default_factory=list)
+    # Footprint relation of the last real detection (vehicles with zone_test="footprint").
+    zone_overlap: float = 0.0  # share of the footprint inside the zone (0..1)
+    zone_distance_bh: float = float("inf")  # footprint-to-zone distance in box heights (0 inside)
+    near_zone: bool = False  # not in the zone but within close_box_heights of it ("too close")
+    still_seconds: float = 0.0  # ID-free stationary time: the box kept re-appearing where it stood
+    near_stuck_seconds: float = 0.0  # continuous seconds stopped while in the zone OR too close
+    occluded: bool = False  # alarmed vehicle lost under a train box, kept as a hidden hazard
+    # Serial of the physical track (> 0; 0 = unknown): kept when the tracker bridges an id
+    # switch (re-keying, a hidden hazard re-detected), so a re-identified object is not "new".
+    uid: int = 0
 
 
 @dataclass
@@ -92,6 +105,13 @@ class DebrisResult:
     triggered: bool  # persist_seconds >= persist_seconds threshold
     learning_rate_used: float
     warmed_up: bool
+    unknown_fraction: float = 0.0  # zone share the model cannot judge (never seen box-free, off-frame, clipped)
+    covered_fraction: float = 0.0  # zone share under exclusion boxes on this frame
+    registered: bool = False  # the frame was warped into the background's reference geometry
+    trusted: bool = True  # False while registration fails or unknown_fraction is too high
+    gain: float = 1.0  # mean global gain (current / background) divided out before classification
+    held: bool = False  # timers frozen this frame (train over the zone, registration lost)
+    state: str = ""  # short text for status lines, e.g. "warmup 1.2/2.0s", "ok", "held (train)"
 
 
 @dataclass
@@ -121,7 +141,9 @@ class Assessment:
 class Event:
     """Emitted on status transitions; serialised to JSONL by sinks."""
 
-    type: str  # "ALARM_START" | "ALARM_END" | "WARNING_START" | "WARNING_END" | "HEALTH"
+    # "ALARM_START" | "ALARM_UPDATE" | "ALARM_END" | "WARNING_START" | "WARNING_END" | "HEALTH"
+    # | "RUN_START" | "RUN_END" (Monitor.run; the event-log contract in gradecrossing.evaluate)
+    type: str
     timestamp: float
     frame_index: int
     status: str
@@ -142,3 +164,12 @@ class FrameResult:
     gate: GateState
     timings_ms: Dict[str, float] = field(default_factory=dict)
     events: List[Event] = field(default_factory=list)
+    # True while some part of the pipeline cannot fully see on this frame (zone not anchored
+    # or held, debris backstop warming up / held / untrusted, detector slower than the still
+    # clock needs, gate detector failing); the status may then read CLEAR only because the
+    # monitor is partly blind. Per frame, not debounced: the monitor reports lasting changes
+    # as HEALTH events (extra component='monitor'; zone health and debris warm-ups are left to
+    # the zone's and the debris component's own events). ``degraded_reasons`` are short,
+    # stable texts such as "zone held" or "debris held (train)".
+    degraded: bool = False
+    degraded_reasons: Tuple[str, ...] = ()

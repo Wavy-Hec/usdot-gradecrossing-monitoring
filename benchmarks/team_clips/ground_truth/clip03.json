@@ -1,0 +1,16 @@
+{
+ "video": "clip03",
+ "duration": 88.021,
+ "container_duration": 89.0,
+ "events": [
+  {
+   "start": 8,
+   "end": 88,
+   "should_alarm": false,
+   "note": "gates down",
+   "detail": "lowered, and until the arms are fully raised again (checked on frames)"
+  }
+ ],
+ "note": "normal operation: gates, freight train, traffic resumes",
+ "ignore": []
+}

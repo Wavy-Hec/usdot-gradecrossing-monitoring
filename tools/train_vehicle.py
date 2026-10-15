@@ -33,75 +33,14 @@ import json
 import shutil
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 
-class DatasetError(RuntimeError):
-    """Raised when the dataset YAML is missing or its split entries do not resolve."""
+TOOLS_DIR = Path(__file__).resolve().parent
+if str(TOOLS_DIR) not in sys.path:
+    sys.path.insert(0, str(TOOLS_DIR))  # the shared helper below also works when this file is loaded by path
 
-
-def _load_yaml(path: Path) -> Dict[str, Any]:
-    import yaml
-
-    with open(str(path), "r", encoding="utf-8") as fh:
-        data = yaml.safe_load(fh) or {}
-    if not isinstance(data, dict):
-        raise DatasetError("{} does not contain a mapping".format(path))
-    return data
-
-
-def _dataset_root(yaml_path: Path, data: Dict[str, Any]) -> Path:
-    """Directory relative split entries resolve against (``path`` key, else the YAML's folder)."""
-    raw = data.get("path")
-    if not raw:
-        return yaml_path.parent
-    root = Path(str(raw))
-    if root.is_absolute():
-        return root
-    candidate = (yaml_path.parent / root).resolve()
-    if candidate.exists():
-        return candidate
-    try:
-        from ultralytics.utils import DATASETS_DIR
-
-        alt = (Path(DATASETS_DIR) / root).resolve()
-        if alt.exists():
-            return alt
-    except Exception:
-        pass
-    return candidate
-
-
-def resolve_splits(yaml_path: str) -> Dict[str, List[Path]]:
-    """Return {split: [resolved paths]}; train and val are required, test optional but checked."""
-    p = Path(yaml_path)
-    if not p.is_file():
-        raise DatasetError("dataset yaml not found: {} (cwd={})".format(p, Path.cwd()))
-    data = _load_yaml(p)
-    root = _dataset_root(p, data)
-    problems: List[str] = []
-    resolved: Dict[str, List[Path]] = {}
-    for split in ("train", "val", "test"):
-        entry = data.get(split)
-        if entry is None:
-            if split in ("train", "val"):
-                problems.append("'{}:' key missing".format(split))
-            continue
-        entries = entry if isinstance(entry, (list, tuple)) else [entry]
-        paths: List[Path] = []
-        for e in entries:
-            ep = Path(str(e))
-            if not ep.is_absolute():
-                ep = root / ep
-            if not ep.exists():
-                problems.append("'{}' entry {} does not exist (resolved against {})".format(split, ep, root))
-            paths.append(ep)
-        resolved[split] = paths
-    if "names" not in data and "nc" not in data:
-        problems.append("neither 'names' nor 'nc' present")
-    if problems:
-        raise DatasetError("dataset yaml {} is not usable:\n  - {}".format(p, "\n  - ".join(problems)))
-    return resolved
+from _dataset_yaml import DatasetError, resolve_splits  # noqa: E402  (shared with tune_hyperparameters.py)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -210,7 +149,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         import ultralytics
         from ultralytics import YOLO
     except ImportError:
-        print("ERROR: ultralytics is not installed (pip install ultralytics)", file=sys.stderr)
+        print("ERROR: ultralytics is not installed. From a checkout: pip install -r requirements.txt (headless "
+              "OpenCV; the same as pip install \".[detector]\") or -r requirements-display.txt (GUI OpenCV); not a "
+              "bare 'pip install ultralytics', which adds the GUI opencv-python next to the headless one",
+              file=sys.stderr)
         return 2
 
     model = YOLO(args.model)

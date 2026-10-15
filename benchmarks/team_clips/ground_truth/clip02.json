@@ -1,0 +1,15 @@
+{
+ "video": "clip02",
+ "duration": 73.04,
+ "container_duration": 79.1,
+ "events": [
+  {
+   "start": 8,
+   "end": 66,
+   "should_alarm": false,
+   "note": "gates down"
+  }
+ ],
+ "note": "normal operation: gates lower, freight train passes, gates rise",
+ "ignore": []
+}

@@ -42,6 +42,14 @@ def warp_matrix(angle_deg: float, tx: float, ty: float) -> np.ndarray:
     return np.vstack([M, [0.0, 0.0, 1.0]]).astype(np.float64)
 
 
+def uneven_exposure(img: np.ndarray) -> np.ndarray:
+    """Exposure varying across the frame (gain 0.2-1.0 in two waves: cloud shadows, a
+    headlight). LK's brightness constancy fails even after a global histogram match;
+    ORB's local binary tests do not care."""
+    gain = 0.6 + 0.4 * np.sin(np.linspace(0.0, 12.0, img.shape[1], dtype=np.float32))
+    return np.clip(img.astype(np.float32) * gain[None, :, None], 0, 255).astype(np.uint8)
+
+
 def rms_error(poly_a: np.ndarray, poly_b: np.ndarray) -> float:
     a = np.asarray(poly_a, dtype=np.float64).reshape(-1, 2)
     b = np.asarray(poly_b, dtype=np.float64).reshape(-1, 2)
@@ -84,8 +92,15 @@ def test_initialize_returns_identity_state(image):
     assert state.area_px == cv2.countNonZero(state.mask) > 0
     assert stab.reference_features.shape[0] > 100  # richly textured image gives many corners
     health = stab.health()
-    assert set(health) == {"method", "inliers", "healthy", "keyframe_age_s", "consecutive_unhealthy"}
+    # The original keys are kept; motion model, hold reason, offset and re-anchor drift
+    # bookkeeping were added with the similarity model / temporal gate / to_reference.
+    assert {"method", "inliers", "healthy", "keyframe_age_s", "consecutive_unhealthy"} <= set(health)
+    assert {"initialized", "motion_model", "reason", "offset_px", "reanchors", "unverified_reanchors",
+            "refused_reanchors", "drift_px"} <= set(health)
     assert health["method"] == "identity" and health["healthy"] is True
+    assert health["initialized"] is True and health["motion_model"] == "similarity"
+    assert health["offset_px"] == 0.0 and health["reanchors"] == 0 and health["drift_px"] is None
+    assert np.array_equal(state.to_reference, np.eye(3))
 
 
 def test_features_are_excluded_from_zone(image):
@@ -141,26 +156,25 @@ def test_min_inlier_fraction_rejects_a_minority_agreement(image, warped_pair):
     assert stab.reference_features.shape[0] == 400
     assert stab.min_lk_inliers() == 80  # max(30, 0.2 * 400)
 
-    # A plausible homography backed by only 45 of the 400 features is refused ...
-    assert not stab._accept(H_true, 45, stab.min_lk_inliers())
-    # ... and the same homography with 120 inliers is accepted.
-    assert stab._accept(H_true, 120, stab.min_lk_inliers())
-
-    # End to end through update(), with _lk_homography faked to a minority agreement.
-    stab._lk_homography = lambda _gray: (H_true, 45)  # type: ignore[assignment]
+    # End to end through update(), with the RANSAC fit faked to return the true (plausible)
+    # transform backed by only 45 of the 400 features: refused, and held.
+    stab._fit = lambda src, dst: (H_true, 45, None)  # type: ignore[assignment]
     stab.cfg.orb_fallback = False
     held = stab.update(warped, 1.0 / 30.0)
     assert held.method == "held" and held.healthy is False and held.inliers == 45
-    stab._lk_homography = lambda _gray: (H_true, 120)  # type: ignore[assignment]
+    assert "45 inliers < 80" in stab.health()["reason"]
+    # ... and the same transform with 120 inliers is accepted.
+    stab._fit = lambda src, dst: (H_true, 120, None)  # type: ignore[assignment]
     good = stab.update(warped, 2.0 / 30.0)
     assert good.method == "lk" and good.healthy is True
     assert rms_error(good.polygon, transform_points(np.float32(POLY), H_true)) <= 1.5
 
     # min_inlier_fraction = 0 restores the absolute-only rule (min_inliers alone).
-    plain = make_stabilizer(min_inliers=30, min_inlier_fraction=0.0)
+    plain = make_stabilizer(min_inliers=30, min_inlier_fraction=0.0, orb_fallback=False)
     plain.initialize(image, 0.0)
     assert plain.min_lk_inliers() == 30
-    assert plain._accept(H_true, 45, plain.min_lk_inliers())
+    plain._fit = lambda src, dst: (H_true, 45, None)  # type: ignore[assignment]
+    assert plain.update(warped, 1.0 / 30.0).method == "lk"
 
 
 def test_min_inlier_fraction_default_still_accepts_a_real_track(image, warped_pair):
@@ -212,9 +226,9 @@ def test_hold_when_orb_fallback_disabled(image, warped_pair):
     stab = make_stabilizer(orb_fallback=False)
     stab.initialize(image, 0.0)
     stab.update(warped, 1.0 / 30.0)
-    # halve the brightness: LK's brightness-constancy assumption breaks, so it fails
-    dark = cv2.convertScaleAbs(warped, alpha=0.5, beta=0)
-    state = stab.update(dark, 2.0 / 30.0)
+    # exposure varying across the frame: LK fails (a global brightness change no longer
+    # does - see the histogram-matched LK test), so only ORB could follow
+    state = stab.update(uneven_exposure(warped), 2.0 / 30.0)
     assert state.method == "held"
     assert state.healthy is False
 
@@ -288,17 +302,39 @@ def test_keyframe_refresh_requires_healthy_estimate(image, warped_pair):
 
 
 # ----------------------------------------------------------------------------- ORB fallback
-def test_orb_fallback_on_large_brightness_change(image, warped_pair):
-    """Halving the gain breaks LK (brightness constancy) but ORB descriptors survive."""
+def test_global_exposure_change_is_tracked_by_histogram_matched_lk(image, warped_pair):
+    """Halving the gain breaks LK's brightness constancy (it used to take ORB, ~1 px less
+    precise and several times slower); LK on the frame remapped to the keyframe's
+    histogram recovers it with LK precision."""
     H_true, warped = warped_pair
     dark = cv2.convertScaleAbs(warped, alpha=0.5, beta=0)
     stab = make_stabilizer()
     stab.initialize(image, 0.0)
-    # sanity: the LK path alone really is unhealthy on this frame
-    _H_lk, lk_inliers = stab._lk_homography(cv2.cvtColor(dark, cv2.COLOR_BGR2GRAY))
-    assert lk_inliers < stab.cfg.min_inliers
-
+    # sanity: plain LK really fails on this frame
+    lk_est, lk_inliers, _reason = stab._lk_estimate(stab._keyframe, cv2.cvtColor(dark, cv2.COLOR_BGR2GRAY))
+    assert lk_est is None and lk_inliers < stab.cfg.min_inliers
     state = stab.update(dark, 1.0 / 30.0)
+    assert state.method == "lk" and state.healthy is True
+    assert rms_error(state.polygon, transform_points(np.float32(POLY), H_true)) <= 1.0
+    # the remap is skipped when the exposures already agree
+    assert stab._photometric_match(stab._keyframe, cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)) is None
+
+
+def test_orb_fallback_on_uneven_exposure_change(image, warped_pair):
+    """Exposure varying across the frame defeats LK even after the histogram match, but
+    ORB descriptors survive."""
+    H_true, warped = warped_pair
+    uneven = uneven_exposure(warped)
+    stab = make_stabilizer()
+    stab.initialize(image, 0.0)
+    # sanity: the LK paths alone really are unhealthy on this frame
+    gray = cv2.cvtColor(uneven, cv2.COLOR_BGR2GRAY)
+    lk_est, _lk_inliers, _reason = stab._lk_estimate(stab._keyframe, gray)
+    assert lk_est is None
+    matched = stab._photometric_match(stab._keyframe, gray)
+    assert matched is None or stab._lk_estimate(stab._keyframe, matched)[0] is None
+
+    state = stab.update(uneven, 1.0 / 30.0)
     expected = transform_points(np.float32(POLY), H_true)
     assert state.method == "orb"
     assert state.healthy is True
@@ -311,10 +347,11 @@ def test_orb_helper_directly(image, warped_pair):
     H_true, warped = warped_pair
     stab = make_stabilizer()
     stab.initialize(image, 0.0)
-    H_orb, inliers, n_good = stab._orb_homography(cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY))
-    assert H_orb is not None
-    assert n_good >= stab.cfg.orb_min_matches
-    assert inliers >= stab.cfg.orb_min_matches
+    est, reason = stab._orb_estimate(stab._keyframe, cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY))
+    assert est is not None and reason == ""
+    H_orb = est.M
+    assert est.src.shape[0] >= est.inliers >= stab.cfg.orb_min_matches
+    assert est.inliers >= stab.cfg.orb_min_inlier_fraction * est.src.shape[0]
     assert np.allclose(H_orb, H_true, atol=0.3)
     expected = transform_points(np.float32(POLY), H_true)
     assert rms_error(transform_points(np.float32(POLY), H_orb), expected) <= 2.0
@@ -326,9 +363,12 @@ def test_large_jump_beyond_lk_range_falls_back_to_orb(image):
     jumped = cv2.warpPerspective(image, H_jump, (W, H))
     stab = make_stabilizer()
     stab.initialize(image, 0.0)
+    # sanity: LK alone cannot follow a jump this large
+    assert stab._lk_estimate(stab._keyframe, cv2.cvtColor(jumped, cv2.COLOR_BGR2GRAY))[0] is None
     state = stab.update(jumped, 1.0 / 30.0)
     assert state.healthy is True
-    assert state.method in ("lk", "orb")
+    assert state.method == "orb"
+    assert state.inliers >= stab.cfg.orb_min_matches
     assert rms_error(state.polygon, transform_points(np.float32(POLY), H_jump)) <= 2.0
 
 

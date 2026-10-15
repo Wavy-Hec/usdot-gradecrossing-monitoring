@@ -9,7 +9,6 @@ import importlib.util
 import json
 import logging
 import os
-import py_compile
 import subprocess
 import sys
 import types
@@ -27,6 +26,7 @@ from gradecrossing.detection import (
     CATEGORY_VEHICLE,
     InfrastructureDetector,
     VehicleDetector,
+    load_yolo,
     results_to_detections,
 )
 from gradecrossing.types import Detection, GateState
@@ -36,8 +36,6 @@ TOOLS = ROOT / "tools"
 VEHICLE_WEIGHTS = ROOT / "50_epochs_best.pt"
 INFRA_WEIGHTS = ROOT / "notebooks" / "infrastructure tuning best weights" / "best.pt"
 SUBPROCESS_ENV = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONPATH=str(ROOT))
-
-np.random.seed(0)
 
 
 # --------------------------------------------------------------------------------------------
@@ -181,6 +179,65 @@ def test_detect_uses_track_with_persist_and_converts_boxes():
     assert out[0].bottom_center == (30.0, 80.0)
 
 
+def test_tracker_can_get_low_score_boxes_but_idless_boxes_keep_the_decision_threshold():
+    """team-david D21 (corrected): model.track at conf 0.25 leaves ByteTrack's second (0.1-0.25)
+    association stage empty. With detector.track_conf the tracker is fed lower; a box it returns
+    with an id is a tracked box (ByteTrack's own thresholds decided it), while a box without an
+    id (ultralytics hands back raw boxes when no track is active) is a plain detection and still
+    needs conf. Opt-in: by default (None) the tracker gets conf, exactly the pre-port call."""
+    boxes = _FakeBoxes([[10, 20, 50, 80], [100, 100, 200, 220], [300, 50, 340, 90], [400, 50, 450, 90]],
+                       [0.15, 0.6, 0.12, 0.4], [0, 4, 0, 0], None)
+    tracked = _FakeBoxes([[10, 20, 50, 80], [100, 100, 200, 220]], [0.15, 0.6], [0, 4], [3, 4])
+    model = _FakeModel(VEHICLE_NAMES, scripts=[tracked, boxes])
+    det = VehicleDetector(DetectorConfig(track_conf=0.1), model=model)
+    out = det.detect(_frame())
+    assert [(d.track_id, round(d.conf, 2)) for d in out] == [(3, 0.15), (4, 0.6)]  # a 0.15 box keeps id 3
+    assert model.track_calls[0]["conf"] == 0.1
+    out = det.detect(_frame())  # no ids: only the boxes at or above conf (0.25) survive
+    assert [round(d.conf, 2) for d in out] == [0.6, 0.4]
+    # the default sends the pre-port call (conf) and filters nothing
+    assert DetectorConfig().track_conf is None
+    model2 = _FakeModel(VEHICLE_NAMES, scripts=[boxes])
+    out = VehicleDetector(DetectorConfig(), model=model2).detect(_frame())
+    assert model2.track_calls[0]["conf"] == 0.25 and len(out) == 4
+    # plain detection ignores track_conf
+    model3 = _FakeModel(VEHICLE_NAMES, scripts=[boxes])
+    VehicleDetector(DetectorConfig(tracker="", track_conf=0.1), model=model3).detect(_frame())
+    assert model3.predict_calls[0]["conf"] == 0.25
+    for bad in ({"track_conf": 0.0}, {"conf": 1.5}):
+        with pytest.raises(ValueError):
+            VehicleDetector(DetectorConfig(**bad), model=_FakeModel(VEHICLE_NAMES))
+
+
+def test_bad_detector_scores_fail_when_the_monitor_is_built():
+    """The Monitor builds the detector on the first frame, so a bad detector.track_conf used to
+    raise on every frame instead: five tracebacks, the run loop gave up, and the CLI exited 0.
+    The check now runs in Monitor.__init__, like the tracker's and the engine's (no torch here)."""
+    from gradecrossing.config import MonitorConfig
+    from gradecrossing.monitor import Monitor
+
+    for key, value in (("track_conf", 0.0), ("conf", 1.5), ("conf", 0.0)):
+        cfg = MonitorConfig()
+        setattr(cfg.detector, key, value)
+        with pytest.raises(ValueError, match=f"detector.{key}"):
+            Monitor(cfg)
+    assert Monitor(MonitorConfig())._detector is None  # valid: still built lazily on the first frame
+    VehicleDetector.check_config(DetectorConfig(track_conf=1.0))  # (0, 1] is valid
+
+
+def test_ignore_classes_are_dropped_and_not_warned_about(caplog):
+    """ours-correctness F21: a static false positive inside the zone (COCO 'traffic light' on the
+    crossing signals) blocked the background and keyframe refresh with no configuration fix."""
+    names = {0: "car", 1: "traffic light", 2: "person"}
+    boxes = _FakeBoxes([[0, 0, 10, 10], [20, 20, 30, 40], [50, 50, 60, 80]], [0.9, 0.8, 0.7], [0, 1, 2], [1, 2, 3])
+    with caplog.at_level(logging.WARNING, logger="gradecrossing.detection"):
+        det = VehicleDetector(DetectorConfig(ignore_classes=["Traffic Light"]), model=_FakeModel(names, [boxes]))
+    assert not [r for r in caplog.records if "not mapped" in r.getMessage()]
+    assert [d.cls_name for d in det.detect(_frame())] == ["car", "person"]
+    plain = VehicleDetector(DetectorConfig(tracker=""), model=_FakeModel(names, [boxes]))
+    assert [d.cls_name for d in plain.detect(_frame())] == ["car", "traffic light", "person"]
+
+
 def test_half_true_is_sent_on_every_call():
     # ultralytics rebuilds the predictor (and loses tracker state) if the precision flag changes
     # between calls, so when half is on it must be present on *every* call.
@@ -236,6 +293,31 @@ def test_missing_local_weights_fail_fast(tmp_path):
         VehicleDetector(DetectorConfig(weights=str(tmp_path / "nope.pt")))
     with pytest.raises(FileNotFoundError):
         VehicleDetector(DetectorConfig(weights="not_an_official_name.pt"))
+
+
+def test_without_ultralytics_the_advice_keeps_one_opencv_and_nothing_promises_a_download(
+        monkeypatch, tmp_path, caplog, capsys):
+    """Final review Q5: the error said 'pip install ultralytics', which in a [detector]/[headless]
+    environment adds the GUI opencv-python on top of opencv-python-headless (one cv2/ directory,
+    two owners), and the 'will try to download' notice for yolo11n.pt came before the ImportError."""
+    monkeypatch.setitem(sys.modules, "ultralytics", None)  # import ultralytics -> ImportError
+    monkeypatch.chdir(tmp_path)  # no yolo11n.pt here
+    with caplog.at_level(logging.INFO, logger="gradecrossing.detection"):
+        with pytest.raises(ImportError) as info:
+            load_yolo("yolo11n.pt")
+    message = str(info.value)
+    assert "ultralytics is required" in message  # the CLI test (exit 1) matches on this
+    assert '".[detector]"' in message and '".[display]"' in message and "NVIDIA's torch" in message
+    assert "not a bare 'pip install ultralytics'" in message
+    assert [r.getMessage() for r in caplog.records if "download" in r.getMessage()] == []
+    with pytest.raises(FileNotFoundError):  # a missing custom path is still the first error
+        load_yolo(str(tmp_path / "best_typo.pt"))
+    weights = tmp_path / "best.pt"
+    weights.write_bytes(b"\x00")
+    for tool, argv in (("export_tensorrt", ["--weights", str(weights)]),):
+        assert _load_tool(tool).main(argv) == 2
+        err = capsys.readouterr().err
+        assert "ultralytics is not installed" in err and '".[detector]"' in err and "not a bare" in err
 
 
 # --------------------------------------------------------------------------------------------
@@ -414,13 +496,13 @@ def test_inspect_checkpoint_text_report_and_errors(capsys, tmp_path):
 # --------------------------------------------------------------------------------------------
 # tools/*.py compile, --help and --dry-run paths (no GPU / dataset needed)
 # --------------------------------------------------------------------------------------------
-TOOL_NAMES = ["inspect_checkpoint", "tune_hyperparameters", "train_vehicle", "export_tensorrt"]
+TOOL_NAMES = sorted(p.stem for p in TOOLS.glob("*.py") if not p.stem.startswith("_"))  # _*.py: shared helpers
 
 
 @pytest.mark.parametrize("tool", TOOL_NAMES)
 def test_tool_compiles_and_help_works(tool):
     path = TOOLS / (tool + ".py")
-    py_compile.compile(str(path), doraise=True)
+    compile(path.read_text(encoding="utf-8"), str(path), "exec")
     proc = subprocess.run(
         [sys.executable, str(path), "--help"],
         capture_output=True, text=True, env=SUBPROCESS_ENV, cwd=str(ROOT), timeout=60,
@@ -479,7 +561,8 @@ def test_tune_tool_reads_fitness_from_csv_and_ndjson(tmp_path):
     assert tune.max_fitness(tune.read_fitness(nd_dir)) == pytest.approx(0.31)
     with pytest.raises(FileNotFoundError):
         tune.read_fitness(tmp_path)
-    assert tune.find_tune_dir(str(tmp_path), "tune") in (csv_dir, nd_dir)
+    os.utime(str(csv_dir / "tune_results.csv"), (1.0e9, 1.0e9))
+    assert tune.find_tune_dir(str(tmp_path), "tune") == nd_dir
     assert tune.find_tune_dir(str(tmp_path / "nothing"), "tune") is None
 
 

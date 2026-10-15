@@ -3,17 +3,20 @@ from __future__ import annotations
 
 import json
 import math
+import os
+import subprocess
+import sys
+from pathlib import Path
 
 import numpy as np
 import pytest
 
-from gradecrossing import evaluate as ev
 from gradecrossing.alerting import AlertEngine, JsonlSink
 from gradecrossing.config import AlertConfig, DebrisConfig, StuckConfig
 from gradecrossing.evaluate import GroundTruthEvent, load_alarm_intervals, load_truth_csv, main, score
 from gradecrossing.types import GateState, ObjectState
 
-np.random.seed(0)
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def T(start: float, end: float, kind: str = "stuck_vehicle", video: str = "clip") -> GroundTruthEvent:
@@ -61,12 +64,20 @@ def test_score_tolerance_early_start_without_overlap():
 
 
 def test_score_each_truth_matched_at_most_once():
+    # Each incident still yields one TP. The later alarms inside the same incident (the
+    # alarm latched off and fired again) used to count as false alarms, inflating FA/h for
+    # long incidents (review finding F12); they are now reported as duplicates.
     truth = [T(10, 20)]
     alarms = [(11.0, 12.0), (15.0, 16.0), (18.0, 25.0)]
     r = score(truth, alarms, 60.0)
-    assert (r["tp"], r["fp"], r["fn"]) == (1, 2, 0)
+    assert (r["tp"], r["fp"], r["fn"]) == (1, 0, 0)
+    assert r["duplicates"] == 2 and r["details"]["matches"][0]["n_alarms"] == 3
     assert r["time_to_alert_s"] == [1.0]
-    assert r["false_alarms_per_hour"] == pytest.approx(2 / (60.0 / 3600.0))
+    assert r["false_alarms_per_hour"] == 0.0
+    # an alarm that starts after the incident (beyond the tolerance) is still a false alarm
+    r = score(truth, alarms + [(30.0, 31.0)], 60.0)
+    assert (r["tp"], r["fp"], r["duplicates"]) == (1, 1, 2)
+    assert r["false_alarms_per_hour"] == pytest.approx(1 / (60.0 / 3600.0))
 
 
 def test_score_open_ended_intervals():
@@ -198,8 +209,10 @@ def test_main_missing_file_returns_1(tmp_path, capsys):
 
 
 def test_module_entry_point_exists():
-    assert callable(ev.main)
-    assert ev.__name__ == "gradecrossing.evaluate"
+    proc = subprocess.run([sys.executable, "-m", "gradecrossing.evaluate", "--help"], capture_output=True, text=True,
+                          env=dict(os.environ, PYTHONPATH=str(ROOT)), cwd=str(ROOT), timeout=60)
+    assert proc.returncode == 0, proc.stderr
+    assert "--events" in proc.stdout and "--truth" in proc.stdout
 
 
 # --------------------------------------------------------------------------------------
@@ -214,7 +227,7 @@ def _obj(tid: int, stuck: float, t: float) -> ObjectState:
 
 def test_end_to_end_engine_log_scoring(tmp_path):
     log = tmp_path / "events.jsonl"
-    eng = AlertEngine(StuckConfig(), DebrisConfig(),
+    eng = AlertEngine(StuckConfig(warning_seconds=3.0, alarm_seconds=8.0),  # the 8 s alarm this test expects
                       AlertConfig(latch_seconds=2.0, repeat_notify_seconds=3.0, stdout=False))
     sink = JsonlSink(str(log))
     eng.add_sink(sink)

@@ -21,8 +21,24 @@ A window shows the chosen frame. Left-click the corners of the crossing (in orde
 the boundary), right-click or ``u`` undoes the last point, ``r`` clears, ``s`` accepts the
 automatic seed polygon (yellow, from ``gradecrossing.autozone.propose_zone``; it is only a
 starting guess and is often wrong - always check it), ``Enter``/``y`` saves, ``q``/``Esc``
-quits without saving. The polygon is merged into ``--config`` (or the existing ``--out``,
-or the built-in defaults) and written to ``--out`` together with ``video.source``.
+quits without saving. ``--out`` receives only what the site needs: ``video.source``, the
+polygon and the calibration geometry below, on top of the keys ``--config`` (or the existing
+``--out``) sets itself, except a ``zone.polygon_file``, which the new polygon replaces; every
+other key keeps the package default, so a later default change reaches the site. A base
+config that cannot be loaded exits 2 with a one-line error (a full-default site file of
+gradecrossing 0.2.0, which still names retired keys, is one: the error says what to delete).
+
+The calibration geometry is saved with the polygon: ``zone.reference_size`` is the frame
+size the polygon was drawn in (the monitor scales the polygon to its processing size and
+refuses a stream with another aspect ratio), and the calibration frame itself is written,
+clean (no overlay), next to the config as ``<config stem>_reference.png`` and recorded as
+``zone.reference_image``. The monitor registers live frames against that image (a global
+exposure difference is compensated), so a camera that moved between calibration and
+start-up is corrected on the first live frame; when no live frame can be registered within
+``zone.registration_timeout_seconds`` (night against a daylight frame, a changed view) it
+says so in a HEALTH event, tracks from a live frame at the calibration pose and registers
+later. Calibrate on a frame where the crossing is clear (no train or vehicle in the zone)
+and re-run the tool whenever the camera is re-aimed. ``--no-reference-image`` skips the image.
 
 Headless use (SSH to a Jetson, CI): the tool always prints the frame size and the seed
 polygon, ``--save-frame shot.jpg`` writes the frame (with the seed drawn) so you can pick
@@ -32,10 +48,12 @@ polygon without opening a window. Every printed line is plain ASCII.
 from __future__ import annotations
 
 import argparse
+import copy
+import datetime
 import json
 import sys
 from pathlib import Path
-from typing import List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence
 
 import cv2
 import numpy as np
@@ -45,10 +63,12 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))  # allow `python tools/calibrate_zone.py` from any cwd
 
 from gradecrossing.autozone import propose_zone  # noqa: E402
-from gradecrossing.config import InfrastructureConfig, MonitorConfig, VideoConfig, load_config, save_config  # noqa: E402
+from gradecrossing.config import (  # noqa: E402
+    InfrastructureConfig, MonitorConfig, VideoConfig, config_from_dict, load_config)
 from gradecrossing.geometry import polygon_area  # noqa: E402
 from gradecrossing.monitor import open_source  # noqa: E402
 from gradecrossing.types import Detection  # noqa: E402
+from gradecrossing.zone import ZoneStabilizer  # noqa: E402
 
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".webp"}
 WINDOW = "calibrate_zone - left click: add point | right click/u: undo | s: use seed | Enter: save | q: quit"
@@ -129,24 +149,105 @@ def format_polygon(points: Sequence[Sequence[float]]) -> str:
     return "[" + ", ".join(f"[{fmt(x)}, {fmt(y)}]" for x, y in points) + "]"
 
 
-def write_config(points: Sequence[Sequence[float]], out: str, base: Optional[str], source: Optional[str],
-                 keep_source: bool) -> MonitorConfig:
-    """Merge the polygon (and source) into a config and save it to ``out``.
+def reference_image_path(out: str) -> Path:
+    """Where the clean calibration frame of config ``out`` goes: ``<dir>/<stem>_reference.png``.
 
-    Precedence for the base config: ``--config`` if given, else the existing ``--out``
-    file (so re-calibrating a site keeps its other settings), else the built-in defaults.
+    The path keeps the form ``--out`` was given in (relative paths stay relative to the
+    working directory, which is how the monitor resolves every path in a config; for this
+    one it also tries the repository root, so a monitor started elsewhere still finds it).
     """
+    p = Path(out)
+    return p.with_name(p.stem + "_reference.png")
+
+
+class ConfigFileError(ValueError):
+    """A base config (``--config`` or the existing ``--out``) that cannot be loaded."""
+
+
+def base_config_path(out: str, base: Optional[str]) -> Optional[str]:
+    """The file whose settings the written config keeps: ``--config``, else an existing ``--out``."""
     if base:
-        cfg = load_config(base)
-    elif Path(out).exists():
-        cfg = load_config(out)
-    else:
-        cfg = MonitorConfig()
-    cfg.zone.polygon = [[float(round(x, 1)), float(round(y, 1))] for x, y in points]
+        return base
+    return out if Path(out).exists() else None
+
+
+def read_site_yaml(path: Optional[str]) -> Dict[str, Any]:
+    """The mapping a site YAML sets (only its own keys, no defaults merged in), validated.
+
+    Raises :class:`ConfigFileError` with a one-line message for a missing file, a YAML
+    syntax error, a top level that is not a mapping or an unknown key.
+    """
+    if path is None:
+        return {}
+    import yaml
+
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            data = yaml.safe_load(fh) or {}
+        config_from_dict(data)  # unknown sections/keys and non-mapping sections raise here
+    except Exception as exc:  # noqa: BLE001 - OSError, yaml.YAMLError, KeyError, TypeError...
+        raise ConfigFileError(f"cannot load config {path!r}: {' '.join(str(exc).split())}") from exc
+    return copy.deepcopy(data)
+
+
+def write_config(points: Sequence[Sequence[float]], out: str, base: Optional[str], source: Optional[str],
+                 keep_source: bool, frame_size: Optional[Sequence[int]] = None,
+                 reference_image: Optional[str] = None) -> MonitorConfig:
+    """Write the site config: the base file's own keys plus the source and the zone calibration.
+
+    Only what the site needs is written - ``video.source`` and ``zone.polygon`` /
+    ``reference_size`` / ``reference_image`` - on top of the keys the base file itself sets
+    (``--config`` if given, else the existing ``--out``, so re-calibrating a site keeps its
+    other settings). Nothing is copied from the built-in defaults, so a later change of a
+    default reaches the site; a key that must stay fixed is pinned by writing it in the file.
+    ``frame_size = (w, h)`` becomes ``zone.reference_size``; ``reference_image`` becomes
+    ``zone.reference_image`` ("" removes an image left by an earlier calibration, which no
+    longer matches the new polygon). A ``zone.polygon_file`` in the base is removed (and
+    said so): the monitor prefers the file over ``zone.polygon``, so keeping it would leave
+    the site on the old zone. Returns the written file loaded as a full config.
+    """
+    data = read_site_yaml(base_config_path(out, base))
     if source and not keep_source:
-        cfg.video.source = str(source)
-    save_config(cfg, out)
-    return cfg
+        video = data.get("video") or {}
+        video["source"] = str(source)
+        data["video"] = video
+    zone = data.get("zone") or {}
+    zone["polygon"] = [[float(round(x, 1)), float(round(y, 1))] for x, y in points]
+    old_file = zone.pop("polygon_file", None)
+    if old_file:
+        print(f"zone.polygon_file {old_file!r} removed from the config: the new calibration (zone.polygon) replaces it")
+    if frame_size is not None:
+        zone["reference_size"] = [int(frame_size[0]), int(frame_size[1])]
+    if reference_image:
+        zone["reference_image"] = str(reference_image)
+    elif reference_image is not None:
+        zone.pop("reference_image", None)
+    data["zone"] = zone
+    import yaml
+
+    from gradecrossing import __version__
+
+    header = (f"# Site config written by tools/calibrate_zone.py (gradecrossing {__version__}) on "
+              f"{datetime.date.today().isoformat()}.\n"
+              "# Only this site's keys are listed; every other key takes the package default\n"
+              "# (configs/default.yaml). Add a key here to pin it for this site.\n")
+    class _SiteDumper(yaml.SafeDumper):
+        """Block-style sections; a list of scalars (a point, a size) on one line."""
+
+    _SiteDumper.add_representer(list, lambda dumper, seq: dumper.represent_sequence(
+        "tag:yaml.org,2002:seq", seq, flow_style=not any(isinstance(v, (list, dict)) for v in seq)))
+    Path(out).parent.mkdir(parents=True, exist_ok=True)
+    with open(out, "w", encoding="utf-8") as fh:
+        fh.write(header)
+        yaml.dump(data, fh, Dumper=_SiteDumper, sort_keys=False, default_flow_style=False)
+    return load_config(out)
+
+
+def trackable(frame: np.ndarray, cfg: MonitorConfig) -> bool:
+    """True when the zone stabilizer can anchor on ``frame`` (enough texture outside the zone)."""
+    stab = ZoneStabilizer(cfg.zone)
+    stab.initialize(frame, 0.0)
+    return stab.initialized
 
 
 def draw_polygons(frame: np.ndarray, points: Sequence[Sequence[float]], seed: Optional[np.ndarray],
@@ -238,11 +339,21 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--headless", action="store_true", help="never open a window; print the seed and exit")
     p.add_argument("--save-frame", metavar="PATH", help="write the calibration frame (seed drawn) to this image file")
     p.add_argument("--keep-source", action="store_true", help="do not overwrite video.source in the config")
+    p.add_argument("--no-reference-image", action="store_true",
+                   help="do not save the clean calibration frame next to the config (zone.reference_image)")
     return p
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
+    """Exit status: 0 written (or headless look only), 1 no frame / nothing written / write
+    failed, 2 usage or config error (bad ``--polygon``, a base config that cannot be loaded),
+    3 no GUI available."""
     args = build_parser().parse_args(argv)
+    try:  # a broken base config is reported before a camera is opened or anything is written
+        read_site_yaml(base_config_path(args.out, args.config))
+    except ConfigFileError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
     try:
         frame = grab_frame(args.source, args.frame)
     except RuntimeError as exc:
@@ -294,10 +405,33 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             print("cancelled; nothing written")
             return 1
 
-    cfg = write_config(points, args.out, args.config, args.source, args.keep_source)
-    print(f"wrote {args.out}")
+    reference = ""
+    if not args.no_reference_image:
+        ref_path = reference_image_path(args.out)
+        ref_path.parent.mkdir(parents=True, exist_ok=True)
+        if not cv2.imwrite(str(ref_path), frame):  # the frame as read: no seed, no polygon drawn
+            print(f"error: could not write the reference frame {ref_path}", file=sys.stderr)
+            return 1
+        reference = ref_path.as_posix()
+        print(f"clean calibration frame written to {reference} (zone.reference_image)")
+    try:
+        cfg = write_config(points, args.out, args.config, args.source, args.keep_source,
+                           frame_size=(w, h), reference_image=reference)
+    except ConfigFileError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    except OSError as exc:
+        print(f"error: could not write {args.out}: {exc}", file=sys.stderr)
+        return 1
+    print(f"wrote {args.out} (only this site's keys; everything else is the package default)")
     print("zone:")
     print(f"  polygon: {format_polygon(cfg.zone.polygon)}")
+    print(f"  reference_size: [{w}, {h}]")
+    if reference:
+        print(f"  reference_image: {reference}")
+    if not trackable(frame, cfg):
+        print("warning: this frame has too little texture outside the zone for the zone stabilizer to "
+              "anchor on (black, blurred or uniform?); calibrate on a clear, textured frame", file=sys.stderr)
     print(f"area {polygon_area(np.asarray(cfg.zone.polygon, dtype=np.float32)):.0f} px^2 "
           f"({100.0 * polygon_area(np.asarray(cfg.zone.polygon, dtype=np.float32)) / float(w * h):.1f}% of the frame)")
     print(f"next: python -m gradecrossing.monitor --config {args.out} --events events.jsonl")

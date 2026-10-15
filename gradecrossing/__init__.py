@@ -9,7 +9,7 @@ from __future__ import annotations
 import importlib
 from typing import Any
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"  # the one place the version is written; pyproject.toml reads it from here
 
 from .config import MonitorConfig, load_config  # noqa: F401
 from .types import Assessment, Detection, Event, FrameResult, Status  # noqa: F401

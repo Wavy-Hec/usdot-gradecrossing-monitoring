@@ -1,0 +1,15 @@
+{
+ "video": "clip01",
+ "duration": 32.277,
+ "container_duration": 32.7,
+ "events": [
+  {
+   "start": 2.0,
+   "end": 32.7,
+   "label": "vehicle",
+   "should_alarm": true,
+   "note": "SUV drives onto the crossing and stays there (maneuvering) until the train arrives ~28 s"
+  }
+ ],
+ "ignore": []
+}

@@ -28,6 +28,7 @@ from gradecrossing.config import DetectorConfig, MonitorConfig, config_from_dict
 from gradecrossing.monitor import (
     MAX_CONSECUTIVE_FRAME_ERRORS,
     ConfigClassifier,
+    FrameGeometryError,
     Monitor,
     apply_cli_overrides,
     build_parser,
@@ -227,20 +228,30 @@ class Session:
         return self.results[int(round(t * FPS))].assessment.status
 
 
+def zone_health(events: Sequence[Event]) -> List[Event]:
+    """The zone's own HEALTH events: no extra['component'] (the debris and the monitor's
+    DEGRADED reports carry one)."""
+    return [e for e in events if e.type == "HEALTH" and e.extra.get("component") is None]
+
+
 # ----------------------------------------------------------------------------- scenarios
 
 
 def test_scenario_a_crossing_car_never_alarms():
-    np.random.seed(0)
     # Warm-up (30 frames), then a car crosses the 240 px zone in 2 s at 120 px/s.
     s = Session(make_cfg(), crossing_script(start=30, x0=80.0, speed=120.0, y=230.0))
     res = s.run(160)
     statuses = {r.assessment.status for r in res}
     assert Status.ALARM not in statuses
     assert not s.events_of("ALARM_START", repeats=True)
-    assert all(o.stuck_seconds == 0.0 for r in res for o in r.objects)
-    assert max(o.dwell_seconds for r in res for o in r.objects) <= 2.1
-    # the car was seen inside the zone at some point (bottom-center test)
+    # ID-free stationarity gives a moving box at most (width / 3) / speed of "still" time
+    # (IoU >= 0.5 with its first box): 20 px / 120 px/s here, far below warning_seconds.
+    assert max(o.still_seconds for r in res for o in r.objects) <= (CAR_W / 3.0) / 120.0 + 1.0 / FPS
+    assert max(o.stuck_seconds for r in res for o in r.objects) < make_cfg().stuck.warning_seconds
+    assert Status.WARNING not in statuses
+    # footprint: in the zone from the first touch to the last (2.5 s) plus the 0.5 s exit grace
+    assert max(o.dwell_seconds for r in res for o in r.objects) <= 3.1
+    # the car was seen inside the zone at some point (footprint test)
     assert any(o.in_zone for r in res for o in r.objects)
     # debris: the painted car is excluded by its own detection box, so no debris is ever reported
     after = [r.debris for r in res[30:] if r.debris is not None]
@@ -254,7 +265,6 @@ def test_scenario_a_crossing_car_never_alarms():
 
 
 def test_scenario_b_stopped_car_alarms_latches_and_clears():
-    np.random.seed(0)
     cfg = make_cfg()
     stop_t, leave_t = 3.0, 8.0  # car stops at x=320 (zone center) at t=3.0 s, vanishes at t=8.0 s
     script = stop_script(start=30, x0=80.0, speed=120.0, y=230.0, stop_x=320.0, leave=int(leave_t * FPS))
@@ -264,8 +274,11 @@ def test_scenario_b_stopped_car_alarms_latches_and_clears():
     starts = s.events_of("ALARM_START")
     assert len(starts) == 1, [e.type for e in s.events]
     t_alarm = starts[0].timestamp
-    # stuck time starts once the 1 s speed window is free of the approach samples, then alarm_seconds
-    assert stop_t + cfg.stuck.alarm_seconds <= t_alarm <= stop_t + cfg.stuck.alarm_seconds + cfg.stuck.speed_window_seconds + 0.3
+    # stuck time starts once the 1 s speed window is free of the approach samples, then alarm_seconds;
+    # the ID-free still clock may start up to (CAR_W / 3) / speed earlier (the approach box that
+    # anchors the stop's cluster), depending on sub-pixel box positions
+    lead = (CAR_W / 3.0) / 120.0 + 1.0 / FPS
+    assert stop_t + cfg.stuck.alarm_seconds - lead <= t_alarm <= stop_t + cfg.stuck.alarm_seconds + cfg.stuck.speed_window_seconds + 0.3
     assert starts[0].track_ids == [1]
     assert any("stationary in zone" in r for r in starts[0].reasons)
     warn = s.events_of("WARNING_START")
@@ -289,7 +302,6 @@ def test_scenario_b_stopped_car_alarms_latches_and_clears():
 
 
 def test_scenario_c_gates_down_shortens_alarm_threshold():
-    np.random.seed(0)
     cfg = make_cfg(stuck={"alarm_seconds": 3.0, "warning_seconds": 2.0,
                           "gates_down_alarm_seconds": 0.5, "gates_down_warning_seconds": 0.2})
     stop_t = 3.0
@@ -311,11 +323,9 @@ def test_scenario_c_gates_down_shortens_alarm_threshold():
 
 
 def test_scenario_d_static_debris_alarms_and_never_self_clears():
-    np.random.seed(0)
-    # persist 1.5 s = 45 frames, longer than the ~21 frames MOG2 needs to absorb a static change at
-    # the default empty_learning_rate. The blob appears at t=6 s, after the zone has been "empty"
-    # for more than empty_seconds_before_refresh (5 s), i.e. exactly when the refresh path would be
-    # active. The monitor must withhold zone_empty_seconds while candidate debris persists.
+    # The blob appears at t=6 s on an empty crossing while the selective background update is
+    # running (every 0.5 s); the update must never learn a foreground pixel in the zone, so
+    # the blob alarms after persist_seconds and is never absorbed.
     cfg = make_cfg(debris={"persist_seconds": 1.5})
     appear_t = 6.0
     blob = (290, 190, 350, 230)  # 60x40 = 2400 px = 8.3 % of the zone, inside it
@@ -341,20 +351,21 @@ def test_scenario_d_static_debris_alarms_and_never_self_clears():
     initial = res[int(appear_t * FPS) + 5].debris.area_px
     assert initial > 0
     assert last.area_px >= 0.9 * initial
-    assert last.learning_rate_used == 0.0  # frozen while the alarm holds
-    # before the blob, with the zone empty for > 5 s, the slow refresh was allowed (and harmless)
+    # the update kept running all along (before and during the alarm) without learning the blob
+    assert any(r.debris.learning_rate_used > 0.0 for r in res[int(4.0 * FPS):int(appear_t * FPS)])
+    assert any(r.debris.learning_rate_used > 0.0 for r in res[first_alarm:])
+    x1, y1, x2, y2 = blob
+    assert s.mon.debris.background_image()[y1:y2, x1:x2].mean() < 200  # still the scene, not the white blob
     pre = res[int(5.5 * FPS)].debris
-    assert pre.learning_rate_used == cfg.debris.empty_learning_rate and pre.area_px == 0
-    # the candidate blob suppressed the refresh before it triggered
+    assert pre.area_px == 0 and pre.warmed_up and pre.trusted
     during = res[int((appear_t + 0.5) * FPS)].debris
-    assert during.persist_seconds > 0 and during.learning_rate_used == 0.0
+    assert during.persist_seconds > 0
 
 
 def test_scenario_e_track_id_swap_does_not_delay_the_alarm():
     """A stationary car whose detector id changes (ByteTrack re-identifying it after the
     train that trapped it passed in front) keeps its clocks: the ALARM still arrives at
     alarm_seconds after the stop, not alarm_seconds after the swap."""
-    np.random.seed(0)
     cfg = make_cfg(stuck={"alarm_seconds": 4.0, "warning_seconds": 1.0})
     stop_t, swap_t = 3.0, 6.0
     base = stop_script(start=30, x0=80.0, speed=120.0, y=230.0, stop_x=320.0, leave=10 ** 6)
@@ -370,7 +381,8 @@ def test_scenario_e_track_id_swap_does_not_delay_the_alarm():
     starts = s.events_of("ALARM_START")
     assert len(starts) == 1, [(e.type, e.timestamp) for e in s.events]
     t_alarm = starts[0].timestamp
-    assert stop_t + cfg.stuck.alarm_seconds <= t_alarm <= (
+    lead = (CAR_W / 3.0) / 120.0 + 1.0 / FPS  # the still clock can start this much before the stop
+    assert stop_t + cfg.stuck.alarm_seconds - lead <= t_alarm <= (
         stop_t + cfg.stuck.alarm_seconds + cfg.stuck.speed_window_seconds + 0.3)
     assert t_alarm > swap_t  # the alarm really is raised after the id changed
     assert starts[0].track_ids == [2]
@@ -378,16 +390,13 @@ def test_scenario_e_track_id_swap_does_not_delay_the_alarm():
     assert len(res[-1].objects) == 1 and res[-1].objects[0].track_id == 2
 
 
-def test_stationary_unmapped_class_blocks_the_background_refresh():
-    """An object of a class the config does not map is invisible to the alert engine and is
-    still excluded from the debris mask, so the one protection left is that it stops the
-    empty-zone refresh: the background must not learn a stationary obstruction away. This
-    also documents the residual hole - no WARNING or ALARM is raised for such an object, so
-    map every class that can obstruct the crossing in detector.vehicle_classes /
-    person_classes (the detector logs the unmapped ones at start-up)."""
-    np.random.seed(0)
+def test_stationary_unmapped_class_raises_a_debris_alarm():
+    """An object of a class the config does not map ('bench', 'cow', 'suitcase') is invisible
+    to the alert engine. It used to be excluded from the debris mask as well, so nothing could
+    alarm on it (the documented hole, ours-correctness M2). Only vehicle, person and train
+    boxes are debris exclusions now, so the backstop sees it and alarms."""
     cfg = make_cfg()
-    appear = int(6.0 * FPS)  # after empty_seconds_before_refresh (5 s) has elapsed
+    appear = int(6.0 * FPS)
 
     def script(i: int) -> List[Detection]:
         return [car_det(320.0, 230.0, tid=1, cls="bench")] if i >= appear else []
@@ -396,18 +405,13 @@ def test_stationary_unmapped_class_blocks_the_background_refresh():
     res = s.run(int(10.0 * FPS))
     obj = res[-1].objects[0]
     assert obj.in_zone and not (obj.is_vehicle or obj.is_person or obj.is_train)
-    # before it arrives the zone is empty and the slow refresh is allowed
-    assert res[appear - 1].debris.learning_rate_used == pytest.approx(cfg.debris.empty_learning_rate)
-    # From its second frame on the refresh is off, so it can never be learned as background.
-    # (min_track_age_frames ignores a brand-new id for one frame, so exactly one frame is
-    # still learned at the refresh rate - 0.5 % of the weight MOG2 would need to absorb it.)
-    assert all(r.debris.learning_rate_used == 0.0 for r in res[appear + 1:])
-    assert s.mon.tracker.zone_occupied and s.mon.tracker.zone_empty_since is None
-    assert Status.ALARM not in {r.assessment.status for r in res}  # the documented hole
+    starts = s.events_of("ALARM_START")
+    assert len(starts) == 1 and any(r.startswith("debris") for r in starts[0].reasons)
+    assert 6.0 + cfg.debris.persist_seconds <= starts[0].timestamp <= 6.0 + cfg.debris.persist_seconds + 0.3
+    assert res[-1].debris.triggered and res[-1].debris.area_px > 0
 
 
 def test_detect_every_3_frames_keeps_exclusion_boxes_on_the_moving_car():
-    np.random.seed(0)
     cfg = make_cfg(detector={"detect_every_n_frames": 3})
     script = crossing_script(start=30, x0=80.0, speed=120.0, y=230.0)
     s = Session(cfg, script)
@@ -451,31 +455,52 @@ def test_resize_width_scales_zone_polygon():
 
 
 def test_health_events_on_zone_health_transitions():
-    np.random.seed(0)
+    # Deliberately changed with zone.health_report_seconds (default 0.5 s): a change of zone
+    # health is reported once it has lasted that long, not on every flip - a single held
+    # frame is not an event, and a flickering estimate in deep low light no longer floods
+    # the sinks (the review counted ~460 events a minute). health_report_seconds = 0 keeps
+    # the old every-flip behaviour, checked at the end.
     s = Session(make_cfg())
     s.run(5)
-    assert not s.events_of("HEALTH")
+    assert not zone_health(s.events)
     uniform = np.full((H, W, 3), 128, dtype=np.uint8)
     s.fake.index = 5
     r = s.mon.process_frame(uniform, 5 / FPS, 5)
     assert not r.zone.healthy and r.zone.method == "held"
-    health = [e for e in s.events if e.type == "HEALTH"]
-    assert len(health) == 1 and health[0].extra["healthy"] is False and health[0].extra["method"] == "held"
-    assert health[0].status == "CLEAR" and health[0].frame_index == 5
-    assert r.events and r.events[0].type == "HEALTH"  # also visible in the FrameResult
-    # textured frame again: healthy -> second HEALTH event
+    assert not zone_health(s.events)  # one held frame: no event
+    s.i = 6
     s.run(1)
-    health = [e for e in s.events if e.type == "HEALTH"]
-    assert len(health) == 2 and health[1].extra["healthy"] is True
+    # held for 0.5 s: one event, at the frame where the hold had lasted that long
+    for i in range(7, 7 + 20):
+        s.fake.index = i
+        r = s.mon.process_frame(uniform, i / FPS, i)
+        if i == 7 + 15:
+            assert zone_health(r.events)  # also visible in the FrameResult
+    health = zone_health(s.events)
+    assert len(health) == 1 and health[0].extra["healthy"] is False and health[0].extra["method"] == "held"
+    assert health[0].status == "CLEAR" and health[0].frame_index == 7 + 15
+    assert "zone unhealthy (holding last good polygon) for 0.50 s" in health[0].reasons[0]
+    # textured frames again: healthy for 0.5 s -> second HEALTH event
+    s.i = 27
+    s.run(20)
+    health = zone_health(s.events)
+    assert len(health) == 2 and health[1].extra["healthy"] is True and health[1].frame_index == 27 + 15
+    # every flip, as before, with health_report_seconds = 0
+    s0 = Session(make_cfg(zone={"health_report_seconds": 0.0}))
+    s0.run(2)
+    s0.mon.process_frame(uniform, 2 / FPS, 2)
+    s0.i = 3
+    s0.run(1)
+    assert [e.extra["healthy"] for e in zone_health(s0.events)] == [False, True]
     # disabled: no events
     s2 = Session(make_cfg(zone={"health_events": False}))
     s2.run(2)
-    s2.mon.process_frame(uniform, 2 / FPS, 2)
-    assert not [e for e in s2.events if e.type == "HEALTH"]
+    for i in range(2, 30):
+        s2.mon.process_frame(uniform, i / FPS, i)
+    assert not zone_health(s2.events)
 
 
 def test_reset_forgets_everything_and_reinitialises_zone():
-    np.random.seed(0)
     cfg = make_cfg()
     s = Session(cfg, stop_script(start=0, x0=320.0, speed=120.0, y=230.0, stop_x=320.0, leave=10 ** 6))
     s.run(int(3.0 * FPS))
@@ -490,11 +515,13 @@ def test_reset_forgets_everything_and_reinitialises_zone():
     r = s.run(1)[-1]
     assert r.zone.method == "identity" and r.zone.healthy
     assert r.assessment.status is Status.CLEAR
-    assert len(s.events) == n_events  # reset emits nothing
+    # reset emits nothing; the first frame after it reports the debris warm-up restarting
+    new = s.events[n_events:]
+    assert [e.extra.get("warming_up") for e in new] == [True]
+    assert new[0].type == "HEALTH" and new[0].extra["component"] == "debris"
 
 
 def test_frame_result_objects_are_snapshots():
-    np.random.seed(0)
     s = Session(make_cfg(), stop_script(start=0, x0=320.0, speed=120.0, y=230.0, stop_x=320.0, leave=10 ** 6))
     res = s.run(int(2.0 * FPS))
     early = res[45].objects[0].stuck_seconds
@@ -675,17 +702,16 @@ def test_run_aborts_after_repeated_frame_errors(tmp_path):
     assert summary["errors"] == MAX_CONSECUTIVE_FRAME_ERRORS
 
 
-def test_live_geometry_change_reinitialises_instead_of_exiting(tmp_path):
-    """An RTSP stream that renegotiates its resolution makes ZoneStabilizer raise ValueError.
-    On a live source the pipeline re-initialises on the new geometry (and says so with a
-    HEALTH event) rather than ending the run; pin the geometry with video.resize_width to
-    avoid the re-initialisation entirely."""
+def test_live_value_error_is_a_lost_frame_not_a_reinitialisation(tmp_path):
+    """MA2: any ValueError on a live source used to re-initialise the pipeline - a CLEAR
+    ALARM_END, every clock wiped and the debris background re-learned with the obstruction
+    in view. Only a frame of another aspect ratio (FrameGeometryError) re-initialises now;
+    any other ValueError is one lost frame like every other error. (Replaces the test that
+    pinned the reset on any ValueError.)"""
     clip = write_clip(tmp_path / "clip.mp4", n_frames=12)
     events: List[Event] = []
 
-    class ResizingDetector(FakeDetector):
-        """Stands in for the stream: the frame handed to the zone changes size once."""
-
+    class FailingOnceDetector(FakeDetector):
         def detect(self, frame_bgr):
             if len(self.calls) == 4:
                 self.calls.append(-1)
@@ -694,14 +720,57 @@ def test_live_geometry_change_reinitialises_instead_of_exiting(tmp_path):
 
     cfg = make_cfg(video={"source": str(clip), "max_frames": 8, "live": True},
                    debris={"warmup_frames": 2})
-    fake = ResizingDetector(no_cars)
+    fake = FailingOnceDetector(no_cars)
     mon = Monitor(cfg, detector=fake, sinks=[CallbackSink(events.append)])
     summary = mon.run()
     assert summary["errors"] == 1 and summary["frames"] == 8
-    resets = [e for e in events if e.type == "HEALTH" and e.extra.get("reset")]
-    assert len(resets) == 1 and "re-initialised" in resets[0].reasons[0]
-    assert summary["health_events"] >= 1
-    assert fake.resets == 1  # Monitor.reset() propagated to the detector
+    assert not [e for e in events if e.type == "HEALTH" and e.extra.get("reset")]
+    assert fake.resets == 0  # nothing was re-initialised
+
+
+def test_same_aspect_resolution_change_is_resized_not_reinitialised():
+    """MA2: frames are brought to the processing size the first frame fixed. A stream that
+    renegotiates 640x360 -> 1280x720 (same aspect) keeps its zone, tracks, debris model and
+    ALARM; one HEALTH event (component 'source') reports the change, and its return too."""
+    s = Session(make_cfg(), stop_script(start=0, x0=320.0, speed=120.0, y=230.0, stop_x=320.0, leave=10 ** 6))
+    s.run(int(2.0 * FPS))
+    assert s.mon.engine.status is Status.ALARM
+    stabilizer, debris_model = s.mon.stabilizer, s.mon.debris
+    seen: List[Tuple[int, int]] = []
+    orig_detect = s.fake.detect
+    s.fake.detect = lambda f: seen.append(f.shape[:2]) or orig_detect(f)  # type: ignore[assignment]
+    for k in range(60):
+        i = s.i
+        s.fake.index = i
+        big = cv2.resize(s.frame(i), (2 * W, 2 * H), interpolation=cv2.INTER_LINEAR)
+        r = s.mon.process_frame(big if k < 45 else s.frame(i), i / FPS, i)
+        s.results.append(r)
+        s.i += 1
+        assert r.assessment.status is Status.ALARM and r.zone.mask.shape == (H, W)
+    assert set(seen) == {(H, W)} and s.mon.last_frame.shape == (H, W, 3)
+    assert s.mon.stabilizer is stabilizer and s.mon.debris is debris_model and s.results[-1].debris.warmed_up
+    assert not s.events_of("ALARM_END") and len(s.events_of("ALARM_START")) == 1
+    changes = [e for e in s.events if e.type == "HEALTH" and e.extra.get("state") == "resolution_changed"]
+    assert [(e.frame_index, e.extra["native_size"], e.extra["processing_size"]) for e in changes] == [
+        (60, [2 * W, 2 * H], [W, H]), (105, [W, H], [W, H])]
+    assert changes[0].extra["component"] == "source" and "1280x720" in changes[0].reasons[0]
+
+
+def test_processing_size_with_resize_width_and_aspect_tolerance():
+    """video.resize_width fixes the processing width; a later frame within ASPECT_TOLERANCE of
+    the processing aspect ratio (1920x1088 vs 16:9) gets exactly that size, a frame with
+    another aspect ratio raises FrameGeometryError before any stage has seen it."""
+    mon = Monitor(make_cfg(video={"resize_width": 320}), detector=FakeDetector(no_cars))
+    frame = Scene(0).frame()
+    assert mon.process_frame(frame, 0.0, 0).zone.mask.shape == (180, 320)
+    r = mon.process_frame(cv2.resize(frame, (1920, 1088)), 1 / FPS, 1)
+    assert r.zone.mask.shape == (180, 320) and mon.last_frame.shape == (180, 320, 3)
+    processed = mon._frames_processed
+    with pytest.raises(FrameGeometryError, match="640x480") as info:
+        mon.process_frame(cv2.resize(frame, (640, 480)), 2 / FPS, 2)
+    assert isinstance(info.value, ValueError)  # callers that catch ValueError still do
+    assert mon._frames_processed == processed and mon.stabilizer is not None
+    assert mon.process_frame(frame, 3 / FPS, 3).zone.mask.shape == (180, 320)  # and carries on
 
 
 def test_run_loop_and_start_seconds(tmp_path):

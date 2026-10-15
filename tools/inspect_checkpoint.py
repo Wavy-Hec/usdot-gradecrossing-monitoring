@@ -9,8 +9,14 @@ and it takes seconds. All the interesting bookkeeping (epoch, training arguments
 metrics, class names) lives in the small ``data.pkl`` pickle, so we unpickle only that file with
 a custom :class:`pickle.Unpickler`:
 
-* ``find_class`` returns a lightweight stub class for every ``torch.*`` / ``ultralytics.*`` symbol
-  (and anything else we cannot import), so ``nn.Module`` objects become plain attribute bags;
+* ``find_class`` hands out real objects only from a fixed allowlist of plain containers and value
+  types (``set``, ``OrderedDict``, ``datetime``, pure paths, numpy arrays/dtypes/scalars, the
+  ``_codecs.encode`` that pickles bytes) - none of them can run code when the pickle calls them;
+* every ``torch.*`` / ``ultralytics.*`` (and other ``numpy``) symbol becomes a named stub class,
+  so ``nn.Module`` objects become plain attribute bags and tensors become stubs;
+* anything else is refused with an error naming the global: a checkpoint that asks for
+  ``builtins.eval``, ``getattr``, ``os.system``... is not a plain ultralytics checkpoint, and
+  loading it with ``YOLO()`` / ``torch.load(weights_only=False)`` would run that code;
 * ``persistent_load`` returns a placeholder for every tensor storage, so no tensor bytes are read.
 
 Typical questions this answers for students: "did this run finish or stop early?", "which
@@ -29,17 +35,48 @@ numpy types are decoded when numpy is importable, otherwise shown as stubs).
 """
 from __future__ import annotations
 
+import _codecs
 import argparse
+import collections
+import datetime
+import importlib
 import io
 import json
+import pathlib
 import pickle
 import sys
 import zipfile
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Any, Dict, List, Optional, Tuple
 
-# Modules whose real classes are safe (no torch) and useful to reconstruct faithfully.
-_REAL_MODULE_ROOTS = ("builtins", "__builtin__", "collections", "_codecs", "numpy", "pathlib", "datetime")
+# The only real objects the unpickler hands out: containers and value types whose constructors
+# cannot run code, plus ``_codecs.encode`` (how protocol-2 pickles store bytes). Concrete
+# PosixPath/WindowsPath become the matching pure path, which can be built on any platform.
+_SAFE_GLOBALS: Dict[Tuple[str, str], Any] = {("_codecs", "encode"): _codecs.encode}
+for _module in ("builtins", "__builtin__"):  # __builtin__: protocol-2 pickles written by Python 3
+    for _obj in (set, frozenset, slice, complex, bytearray, bytes, range, int, float, str, bool, list,
+                 tuple, dict):
+        _SAFE_GLOBALS[(_module, _obj.__name__)] = _obj
+for _name in ("OrderedDict", "defaultdict", "Counter", "deque"):
+    _SAFE_GLOBALS[("collections", _name)] = getattr(collections, _name)
+for _name in ("datetime", "date", "time", "timedelta", "timezone"):
+    _SAFE_GLOBALS[("datetime", _name)] = getattr(datetime, _name)
+for _module in ("pathlib", "pathlib._local"):  # Python 3.13 pickles paths from pathlib._local
+    for _name, _obj in (("PurePath", pathlib.PurePath), ("Path", pathlib.PurePath),
+                        ("PurePosixPath", pathlib.PurePosixPath), ("PosixPath", pathlib.PurePosixPath),
+                        ("PureWindowsPath", pathlib.PureWindowsPath), ("WindowsPath", pathlib.PureWindowsPath)):
+        _SAFE_GLOBALS[(_module, _name)] = _obj
+
+# numpy objects reconstructed for real (imported lazily: numpy is optional). numpy 2 pickles
+# them from numpy._core, numpy 1 from numpy.core; either spelling is tried on either version.
+_SAFE_NUMPY = {
+    ("numpy", "ndarray"), ("numpy", "dtype"),
+    ("numpy.core.multiarray", "_reconstruct"), ("numpy.core.multiarray", "scalar"),
+    ("numpy._core.multiarray", "_reconstruct"), ("numpy._core.multiarray", "scalar"),
+}
+
+# Module roots whose other symbols become named stubs (never imported, never called for real).
+_STUB_ROOTS = ("torch", "ultralytics", "numpy")
 
 # train_args keys most people want to see; --all-train-args prints everything.
 TRAIN_ARGS_SUBSET = (
@@ -88,21 +125,49 @@ class _StoragePlaceholder:
         return "<storage {}>".format(self.pid[1].__name__ if isinstance(self.pid, tuple) and len(self.pid) > 1 and hasattr(self.pid[1], "__name__") else "?")
 
 
+class UnsafeCheckpointError(pickle.UnpicklingError):
+    """The pickle asks for a global outside the allowlist (one that could run code)."""
+
+
+def _numpy_global(module: str, name: str) -> Any:
+    """The real numpy object for an allowlisted (module, name), or None (numpy missing/renamed)."""
+    spellings = [module]
+    if module.startswith("numpy._core."):
+        spellings.append("numpy.core." + module[len("numpy._core."):])
+    elif module.startswith("numpy.core."):
+        spellings.append("numpy._core." + module[len("numpy.core."):])
+    for spelling in spellings:
+        try:
+            return getattr(importlib.import_module(spelling), name)
+        except Exception:  # numpy absent, or this spelling does not exist in the installed numpy
+            continue
+    return None
+
+
 class NoTorchUnpickler(pickle.Unpickler):
-    """Unpickler that never imports torch/ultralytics: unknown classes become :class:`_Stub`."""
+    """Unpickler that never imports torch/ultralytics and never hands out a callable that can run code.
+
+    Allowlisted globals are returned for real, other torch/ultralytics/numpy symbols become
+    named :class:`_Stub` subclasses, and anything else raises :class:`UnsafeCheckpointError`.
+    """
 
     def __init__(self, file: Any) -> None:
         super().__init__(file)
         self._stub_cache: Dict[Tuple[str, str], type] = {}
 
     def find_class(self, module: str, name: str) -> Any:
-        root = module.split(".")[0]
-        if root in _REAL_MODULE_ROOTS:
-            try:
-                return super().find_class(module, name)
-            except Exception:  # numpy missing or renamed module (numpy.core vs numpy._core) -> stub
-                pass
         key = (module, name)
+        if key in _SAFE_GLOBALS:
+            return _SAFE_GLOBALS[key]
+        if key in _SAFE_NUMPY:
+            obj = _numpy_global(module, name)
+            if obj is not None:
+                return obj
+        if module.split(".")[0] not in _STUB_ROOTS:
+            raise UnsafeCheckpointError(
+                "refusing to load global '{}.{}': not a plain container/value type and not a "
+                "torch/ultralytics class, so this is not a plain ultralytics checkpoint (loading it with "
+                "YOLO() or torch.load could run code); nothing was executed".format(module, name))
         if key not in self._stub_cache:
             self._stub_cache[key] = type(name, (_Stub,), {"__module__": module, "__qualname__": name})
         return self._stub_cache[key]
@@ -142,7 +207,7 @@ def _plain(value: Any, depth: int = 0) -> Any:
             return value.item()
         except Exception:
             return repr(value)
-    if isinstance(value, Path):
+    if isinstance(value, PurePath):
         return str(value)
     if isinstance(value, dict):
         return {str(k): _plain(v, depth + 1) for k, v in value.items()}

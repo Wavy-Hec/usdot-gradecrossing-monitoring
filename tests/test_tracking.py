@@ -6,11 +6,13 @@ used in the stationary-car scenarios.
 """
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Callable, Iterable, List, Optional, Tuple
 
 import cv2
 import numpy as np
 import pytest
+import yaml
 
 from gradecrossing.config import DetectorConfig, StuckConfig
 from gradecrossing.geometry import polygon_mask
@@ -22,6 +24,13 @@ DT = 1.0 / FPS
 
 # Zone: a rectangle x in [200, 440], y in [200, 320] on a 640x480 frame.
 ZONE_POLY = [[200, 200], [440, 200], [440, 320], [200, 320]]
+
+# The pre-port rule, as the rollback profile configs/legacy_rule.yaml sets it: single
+# bottom-center point, speed-only stationarity, immediate zone exit. The tests that pin
+# those exact semantics run with it; tests/test_footprint.py and tests/test_still.py cover
+# the defaults, and tests/test_legacy_profile.py replays these scenarios against goldens.
+LEGACY_PROFILE = Path(__file__).resolve().parents[1] / "configs" / "legacy_rule.yaml"
+LEGACY = yaml.safe_load(LEGACY_PROFILE.read_text(encoding="utf-8"))["stuck"]
 
 
 # ----------------------------------------------------------------------------- helpers
@@ -110,7 +119,7 @@ def stationary_car_frames(x: float, y: float, n_frames: int, rng: np.random.Gene
 
 def test_moving_car_never_stuck_and_dwell_resets():
     """Spec test 1: a car crossing at 200 px/s produces no stuck time; dwell grows then resets."""
-    tracker = make_tracker()
+    tracker = make_tracker(**LEGACY)
     zone = make_zone()
     # x goes 40 -> 640 over 3 s; inside the zone (x in [200,440]) for t in [0.8, 2.0].
     snaps = run(tracker, zone, moving_car_frames(40.0, 200.0, 300.0, 91))
@@ -163,7 +172,7 @@ def test_stationary_car_stuck_after_3s():
 
 def test_car_enters_then_stops_counter_starts_after_stop():
     """Stuck time must not accumulate while moving, and must start within one speed window of the stop."""
-    tracker = make_tracker()
+    tracker = make_tracker(**LEGACY)
     zone = make_zone()
     t_stop = 1.5  # x = 40 + 200*1.5 = 340, inside the zone
     frames = []
@@ -379,11 +388,13 @@ def test_short_dropout_within_grace_keeps_counters():
 
 
 def test_corner_overlap_but_bottom_center_outside_is_not_in_zone():
-    """Spec test 6: bbox pixel overlap is never the criterion; only the bottom-center is."""
+    """Spec test 6: overlap of the whole box is never the criterion; only the ground contact is
+    (the bottom footprint strip for vehicles, the bottom-center point otherwise)."""
     tracker = make_tracker()
     zone = make_zone()
     # Box x in [270,330], y in [280,360]: its top corners are inside the zone (y<320),
-    # but the bottom-center (300, 360) is below the zone's bottom edge (y=320).
+    # but the bottom-center (300, 360) and the whole bottom-quarter strip (y 340-360) are
+    # below the zone's bottom edge (y=320).
     box = Detection(xyxy=np.array([270, 280, 330, 360], dtype=np.float32), conf=0.9, cls_id=0,
                     cls_name="car", track_id=5)
     for i in range(5):
@@ -391,6 +402,7 @@ def test_corner_overlap_but_bottom_center_outside_is_not_in_zone():
     o = by_id(objs, 5)
     assert not o.in_zone and o.dwell_seconds == 0.0
     assert not tracker.zone_occupied
+    assert o.near_zone  # its footprint is 20 px = 0.25 box heights from the zone: too close, not in
     # Sanity: a box whose bottom-center IS on the zone edge counts as inside.
     edge = Detection(xyxy=np.array([270, 280, 330, 320], dtype=np.float32), conf=0.9, cls_id=0,
                      cls_name="car", track_id=6)
@@ -454,7 +466,7 @@ def test_predicted_boxes_fed_back_advance_clocks_but_are_not_evidence():
 
 def test_predicted_box_does_not_change_zone_membership():
     """Only real detections may move an object in or out of the zone."""
-    tracker = make_tracker()
+    tracker = make_tracker(**LEGACY)
     zone = make_zone()
     # Car at 200 px/s heading for the zone, last real detection at x = 190 (just outside).
     frames = list(moving_car_frames(-10.0, 200.0, 300.0, 31, tid=1))  # x: -10 .. 190
@@ -473,7 +485,7 @@ def test_predicted_box_does_not_change_zone_membership():
 def test_ground_plane_homography_reports_metres_per_second():
     # Pure scale: 100 px = 1 m. 200 px/s -> 2.0 m/s.
     H = [[0.01, 0.0, 0.0], [0.0, 0.01, 0.0], [0.0, 0.0, 1.0]]
-    tracker = make_tracker(ground_plane_homography=H, speed_threshold=1.0)
+    tracker = make_tracker(ground_plane_homography=H, speed_threshold=1.0, **LEGACY)
     zone = make_zone()
     snaps = run(tracker, zone, moving_car_frames(40.0, 200.0, 300.0, 61))
     o = by_id(snaps[-1][1], 1)
@@ -523,7 +535,7 @@ def test_counters_are_frame_rate_independent():
 
 
 def test_zone_empty_since_lifecycle():
-    tracker = make_tracker()
+    tracker = make_tracker(**LEGACY)
     zone = make_zone()
     assert tracker.zone_empty_since is None  # nothing known before the first update
     tracker.update([], zone, 0.5)

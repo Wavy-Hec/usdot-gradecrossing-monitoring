@@ -130,6 +130,29 @@ def test_object_label_format():
     label.encode("ascii")  # labels are ASCII
 
 
+def test_footprint_strip_is_drawn_only_when_asked():
+    """Under the footprint rule the overlay shows the strip that is tested against the zone; by
+    default (and for persons, trains and unmapped classes) it keeps the bottom-center dot."""
+    f = np.zeros((H, W, 3), np.uint8)
+    res = make_result(detections=[make_det(1)], objects=[make_obj(1, in_zone=False)])
+    dot = draw_overlay(f, res)
+    strip = draw_overlay(f, res, footprint_fraction=0.25)
+    # the box is (300, 200)-(360, 240): its bottom quarter starts at y = 230
+    assert not dot[230, 330].any() and strip[230, 330].any()  # the strip's top edge
+    assert dot[240, 330].any()  # the dot at the bottom-center
+    person = make_result(detections=[make_det(2, cls="person")],
+                         objects=[make_obj(2, cls="person", vehicle=False, person=True, in_zone=False)])
+    assert not draw_overlay(f, person, footprint_fraction=0.25)[230, 330].any()
+
+
+def test_object_label_marks_in_zone_and_near():
+    assert "car* " in object_label(make_obj(1, in_zone=True), "car", 1)
+    near = make_obj(2, in_zone=False)
+    near.near_zone = True
+    assert "car+ " in object_label(near, "car", 2)
+    assert "car " in object_label(make_obj(3, in_zone=False), "car", 3)
+
+
 def test_zone_polygon_colour_reflects_health():
     f = np.zeros((H, W, 3), np.uint8)
     ok = draw_overlay(f, make_result(detections=[], objects=[]))

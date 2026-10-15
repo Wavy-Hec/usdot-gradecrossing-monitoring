@@ -1,0 +1,16 @@
+{
+ "video": "clip05",
+ "duration": 96.997,
+ "container_duration": 102.3,
+ "events": [
+  {
+   "start": 6,
+   "end": 97,
+   "should_alarm": false,
+   "note": "gates down",
+   "detail": "lowered, and until the arms are fully raised again (checked on frames)"
+  }
+ ],
+ "note": "normal operation: tank-car train, traffic resumes",
+ "ignore": []
+}

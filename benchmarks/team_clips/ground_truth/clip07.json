@@ -1,0 +1,20 @@
+{
+ "video": "clip07",
+ "duration": 7.04,
+ "container_duration": 7.9,
+ "events": [
+  {
+   "start": 2.3,
+   "end": 5.8,
+   "label": "vehicle",
+   "should_alarm": true,
+   "note": "van trapped on the track ~3 s before the train hits it"
+  }
+ ],
+ "ignore": [
+  [
+   5.8,
+   7.9
+  ]
+ ]
+}

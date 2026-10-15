@@ -1,0 +1,15 @@
+{
+ "video": "clip04",
+ "duration": 59.993,
+ "container_duration": 64.3,
+ "events": [
+  {
+   "start": 6,
+   "end": 52,
+   "should_alarm": false,
+   "note": "gates down"
+  }
+ ],
+ "note": "normal operation: rural crossing, passenger train",
+ "ignore": []
+}

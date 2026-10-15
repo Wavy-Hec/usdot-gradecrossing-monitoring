@@ -1,41 +1,77 @@
 [build-system]
+# setuptools >= 61 reads the [project] table below. pip older than 21.3 (JetPack 5 ships pip
+# 20.0.2) can only install in editable mode through `setup.py develop`; setup.py is a one-line
+# shim for it and carries no metadata.
 requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "gradecrossing"
-version = "0.2.0"
+dynamic = ["version"]  # single source: __version__ in gradecrossing/__init__.py, see [tool.setuptools.dynamic]
 description = "AI rail grade-crossing monitor: stuck-vehicle, pedestrian and debris alerts from a fixed camera"
 readme = "README.md"
 requires-python = ">=3.8"
+# TODO(team): no license has been chosen. That is the team's / advisor's decision for this
+# USDOT-funded project; once made, add `license = "<SPDX id>"` here and a LICENSE file.
 authors = [{ name = "UTRGV USDOT grade-crossing team" }]
 keywords = ["rail", "grade crossing", "computer vision", "yolo", "safety"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Image Recognition",
 ]
+# The base install is torch-free and OpenCV-free: config, types and gradecrossing-evaluate.
+# Everything that reads frames needs OpenCV, which comes from exactly one of the extras below.
 dependencies = [
     "numpy>=1.24",
-    "opencv-python>=4.8,<5",
-    "ultralytics>=8.3",
     "pyyaml>=6",
-    "lap>=0.5.12",
 ]
 
 [project.optional-dependencies]
+# Pick ONE of headless/detector (headless OpenCV) or display (GUI OpenCV), never both kinds:
+# opencv-python and opencv-python-headless unpack into the same cv2/ directory, pip keeps
+# whichever came last, and uninstalling either one breaks cv2.
+#   pip install ".[detector]"   the monitor (YOLO + ByteTrack), headless: Jetson, Colab, servers
+#   pip install ".[display]"    the monitor with a GUI OpenCV for --display and the zone editor
+#   pip install ".[headless]"   torch-free tools and tests: calibrate_zone --polygon,
+#                               benchmark --no-detector, the test suite
+# requirements.txt = base + detector, requirements-display.txt = base + display,
+# requirements-dev.txt = dev; tests/test_packaging.py keeps those files in step with this one.
+# No upper bound on OpenCV: the suite passes on cv2 5.0, which the real-footage runs also use.
+headless = ["opencv-python-headless>=4.8"]
+detector = [
+    "opencv-python-headless>=4.8",
+    "ultralytics-opencv-headless>=8.3.242",  # ultralytics built against opencv-python-headless (first release 8.3.242); same `ultralytics` import
+    "lap>=0.5.12",  # linear assignment used by the ultralytics ByteTrack/BoT-SORT trackers
+]
+display = [
+    "opencv-python>=4.8",
+    "ultralytics>=8.3",  # depends on opencv-python itself
+    "lap>=0.5.12",
+]
 dev = ["pytest>=7"]
 
 [project.scripts]
-gradecrossing-monitor = "gradecrossing.monitor:main"
+# The monitor needs OpenCV, which only the extras install: gradecrossing._entry turns a missing
+# OpenCV into one line naming the extra (exit 2) instead of a traceback on a base install.
+gradecrossing-monitor = "gradecrossing._entry:monitor"
 gradecrossing-evaluate = "gradecrossing.evaluate:main"
 
 [project.urls]
-Repository = "https://github.com/Wavy-Hec/usdot-gradecrossing-monitoring"
+Repository = "https://github.com/ruby-gonzalez/usdot-gradecrossing-monotoring"
+Issues = "https://github.com/ruby-gonzalez/usdot-gradecrossing-monotoring/issues"
+Releases = "https://github.com/ruby-gonzalez/usdot-gradecrossing-monotoring/releases"  # test clips, datasets, weights
 
 [tool.setuptools]
 packages = ["gradecrossing"]
+
+[tool.setuptools.dynamic]
+version = { attr = "gradecrossing.__version__" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

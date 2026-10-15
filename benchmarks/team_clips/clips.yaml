@@ -1,0 +1,135 @@
+# Team benchmark clips: the advisor's 8 labelled clips (see README.md for provenance).
+#
+# frames / duration_s are DECODED counts: what cv2 (and ffmpeg) actually return when the
+# file is read to the end, and duration_s = frames / fps, which is how the monitor times
+# file frames. container_frames is CAP_PROP_FRAME_COUNT, which over-reports on every clip
+# (team-occupancy OCC-17); the team's ground truth used container_frames / fps as its
+# 'duration', kept there as 'container_duration'.
+# size_bytes / sha256 identify the exact files tools/fetch_clips.py must download.
+
+source:
+  zones_and_ground_truth: upstream/sergei-crossing-experiments @ 2f90d19, occupancy_monitor/ (S. Chuprov)
+  drive_ids: upstream/dataset-pipeline @ ca5ca4e, data/manifests/videos.yaml (D. Sanchez)
+download_url: "https://drive.usercontent.google.com/download?id={drive_id}&export=download&confirm=t"
+
+clips:
+  - id: clip01
+    drive_id: 1_nYQuwJe2Kpp-DsxT0TjQs1VG4ZPE7pa
+    file: clip01.mp4
+    size_bytes: 61210697
+    sha256: 56d6346405b52df883177b5791bc786cc8c9fa5b281d5bdbfdd99fbe13684761
+    width: 1772
+    height: 872
+    fps: 31.446798
+    frames: 1015
+    duration_s: 32.277
+    container_frames: 1027
+    zone: zones/clip01.json
+    ground_truth: ground_truth/clip01.json
+    positives: 1
+    summary: "positive: SUV on the crossing 2.0-32.7 s until the train arrives (1772x872 stress-test clip, variable frame rate)"
+  - id: clip02
+    drive_id: 1QjUpPtTlo4JULkwIQwt_kwChzXtD13w6
+    file: clip02.mp4
+    size_bytes: 3274220
+    sha256: ebb3996d6fb9b059f63d6fe95e0fe894f9c19d634c5070edca12aaba2b12bf3a
+    width: 640
+    height: 360
+    fps: 29.97003
+    frames: 2189
+    duration_s: 73.04
+    container_frames: 2370
+    zone: zones/clip02.json
+    ground_truth: ground_truth/clip02.json
+    positives: 0
+    summary: "negative: gates down 8-66 s, freight train"
+  - id: clip03
+    drive_id: 1lydj16TbAD_YTZKiEEwcqJzgeMNEBQ7s
+    file: clip03.mp4
+    size_bytes: 5954424
+    sha256: 727aaeeb43dd19df853b82229348d9b136ee095897d5ec4ef2817ddbccb83463
+    width: 640
+    height: 360
+    fps: 29.97003
+    frames: 2638
+    duration_s: 88.021
+    container_frames: 2666
+    zone: zones/clip03.json
+    ground_truth: ground_truth/clip03.json
+    positives: 0
+    summary: "negative: gates down 8-88 s, freight train, traffic resumes"
+  - id: clip04
+    drive_id: 1xSXX1g1l3fKfU2aPxIf6u-UkhSP9RBdH
+    file: clip04.mp4
+    size_bytes: 3182571
+    sha256: 00c7727ab368395ec3ba2cd9ee8d483c545e1fd765d10e2ffe1283b0f160f087
+    width: 640
+    height: 360
+    fps: 29.97003
+    frames: 1798
+    duration_s: 59.993
+    container_frames: 1928
+    zone: zones/clip04.json
+    ground_truth: ground_truth/clip04.json
+    positives: 0
+    summary: "negative: rural crossing, gates down 6-52 s, passenger train"
+  - id: clip05
+    drive_id: 1MCkgaAlxMLA34v5IpxCvLGJodiTE-TbK
+    file: clip05.mp4
+    size_bytes: 6131428
+    sha256: 1723d6bff3f8df0467145aed21fbafb4832d544fcbde862960e8737043a6d0c5
+    width: 640
+    height: 360
+    fps: 29.97003
+    frames: 2907
+    duration_s: 96.997
+    container_frames: 3065
+    zone: zones/clip05.json
+    ground_truth: ground_truth/clip05.json
+    positives: 0
+    summary: "negative: gates down 6-97 s, tank-car train, traffic resumes"
+  - id: clip06
+    drive_id: 1PaVMWmF-VbnOthMO7c3Og6np0-Ay9uH2
+    file: clip06.mp4
+    size_bytes: 6009624
+    sha256: f860fb0de997d258ed3101b56c676937637cc591fadd4be702b417d4bd6275ed
+    width: 640
+    height: 360
+    fps: 29.97003
+    frames: 3297
+    duration_s: 110.01
+    container_frames: 3412
+    zone: zones/clip06.json
+    ground_truth: ground_truth/clip06.json
+    positives: 0
+    summary: "negative: gates down 10-110 s; a car waits at the gate in front of the zone from 38 s"
+  - id: clip07
+    drive_id: 1BCxekS89jFaTAEJHZwbbXiOy9p4RSvnM
+    file: clip07.mp4
+    size_bytes: 261759
+    sha256: 3a473b27dea5127a0dd7fbc1ebe787fc75088187bac662cf28d4944829db10cb
+    width: 640
+    height: 360
+    fps: 29.97003
+    frames: 211
+    duration_s: 7.04
+    container_frames: 237
+    zone: zones/clip07.json
+    ground_truth: ground_truth/clip07.json
+    positives: 1
+    summary: "positive: van trapped on the track 2.3-5.8 s before the train hits it; ignore 5.8-7.9 s"
+  - id: clip08
+    drive_id: 10NsQx-HzuKHhBwjGGRAj-p_0vl0JZ77B
+    file: clip08.mp4
+    size_bytes: 343313
+    sha256: fbdf0db9333c92b67dce74748703ab4c698d85d1dec3b10b6f2de0684b6690bd
+    width: 640
+    height: 360
+    fps: 29.97003
+    frames: 241
+    duration_s: 8.041
+    container_frames: 262
+    zone: zones/clip08.json
+    ground_truth: ground_truth/clip08.json
+    positives: 1
+    summary: "positive: the same van from a second camera, 3.3-6.2 s; ignore 6.2-8.7 s"

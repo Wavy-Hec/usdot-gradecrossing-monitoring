@@ -1,0 +1,9428 @@
+{
+ "defaults": {
+  "alerts": {
+   "events_jsonl": "",
+   "latch_seconds": 10.0,
+   "repeat_notify_seconds": 30.0,
+   "stdout": true,
+   "webhook_timeout_seconds": 3.0,
+   "webhook_url": ""
+  },
+  "detector": {
+   "conf": 0.25,
+   "detect_every_n_frames": 1,
+   "device": "",
+   "half": false,
+   "imgsz": 640,
+   "iou": 0.5,
+   "max_det": 100,
+   "person_classes": [
+    "person",
+    "pedestrian"
+   ],
+   "tracker": "bytetrack.yaml",
+   "train_classes": [
+    "train"
+   ],
+   "vehicle_classes": [
+    "car",
+    "truck",
+    "bus",
+    "motorcycle",
+    "motorbike",
+    "jeep",
+    "van",
+    "tricycle",
+    "bicycle"
+   ],
+   "weights": "yolo11n.pt"
+  },
+  "stuck": {
+   "alarm_seconds": 8.0,
+   "dwell_alarm_seconds": 25.0,
+   "dwell_warning_seconds": 12.0,
+   "fallback_iou_threshold": 0.3,
+   "gates_down_alarm_seconds": 3.0,
+   "gates_down_dwell_alarm_seconds": 6.0,
+   "gates_down_warning_seconds": 1.0,
+   "ground_plane_homography": null,
+   "lost_track_grace_seconds": 1.0,
+   "min_history_for_speed": 3,
+   "min_track_age_frames": 2,
+   "person_alarm_seconds": 10.0,
+   "person_warning_seconds": 2.0,
+   "speed_threshold": 12.0,
+   "speed_window_seconds": 1.0,
+   "warning_seconds": 3.0
+  }
+ },
+ "recorded_from": {
+  "commit": "ae66b8f",
+  "repo": "base"
+ },
+ "scenarios": {
+  "monitor": {
+   "A_crossing_car": {
+    "events": [],
+    "statuses": [
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR"
+    ]
+   },
+   "B_stop_latch_clear": {
+    "events": [
+     {
+      "extra": {},
+      "frame_index": 131,
+      "reasons": [
+       "vehicle 1 (car) stationary in zone 0.5s"
+      ],
+      "status": "WARNING",
+      "timestamp": 4.366666666666666,
+      "track_ids": [
+       1
+      ],
+      "type": "WARNING_START"
+     },
+     {
+      "extra": {},
+      "frame_index": 146,
+      "reasons": [
+       "vehicle 1 (car) stationary in zone 1.0s"
+      ],
+      "status": "ALARM",
+      "timestamp": 4.866666666666666,
+      "track_ids": [
+       1
+      ],
+      "type": "WARNING_END"
+     },
+     {
+      "extra": {},
+      "frame_index": 146,
+      "reasons": [
+       "vehicle 1 (car) stationary in zone 1.0s"
+      ],
+      "status": "ALARM",
+      "timestamp": 4.866666666666666,
+      "track_ids": [
+       1
+      ],
+      "type": "ALARM_START"
+     },
+     {
+      "extra": {},
+      "frame_index": 299,
+      "reasons": [],
+      "status": "CLEAR",
+      "timestamp": 9.966666666666667,
+      "track_ids": [],
+      "type": "ALARM_END"
+     }
+    ],
+    "statuses": [
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR"
+    ]
+   },
+   "C_gates_down": {
+    "events": [
+     {
+      "extra": {},
+      "frame_index": 122,
+      "reasons": [
+       "vehicle 1 (car) stationary in zone 0.2s (gates down)"
+      ],
+      "status": "WARNING",
+      "timestamp": 4.066666666666666,
+      "track_ids": [
+       1
+      ],
+      "type": "WARNING_START"
+     },
+     {
+      "extra": {},
+      "frame_index": 131,
+      "reasons": [
+       "vehicle 1 (car) stationary in zone 0.5s (gates down)"
+      ],
+      "status": "ALARM",
+      "timestamp": 4.366666666666666,
+      "track_ids": [
+       1
+      ],
+      "type": "WARNING_END"
+     },
+     {
+      "extra": {},
+      "frame_index": 131,
+      "reasons": [
+       "vehicle 1 (car) stationary in zone 0.5s (gates down)"
+      ],
+      "status": "ALARM",
+      "timestamp": 4.366666666666666,
+      "track_ids": [
+       1
+      ],
+      "type": "ALARM_START"
+     }
+    ],
+    "statuses": [
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM"
+    ]
+   },
+   "E_id_swap": {
+    "events": [
+     {
+      "extra": {},
+      "frame_index": 146,
+      "reasons": [
+       "vehicle 1 (car) stationary in zone 1.0s"
+      ],
+      "status": "WARNING",
+      "timestamp": 4.866666666666666,
+      "track_ids": [
+       1
+      ],
+      "type": "WARNING_START"
+     },
+     {
+      "extra": {},
+      "frame_index": 236,
+      "reasons": [
+       "vehicle 2 (car) stationary in zone 4.0s"
+      ],
+      "status": "ALARM",
+      "timestamp": 7.866666666666666,
+      "track_ids": [
+       2
+      ],
+      "type": "WARNING_END"
+     },
+     {
+      "extra": {},
+      "frame_index": 236,
+      "reasons": [
+       "vehicle 2 (car) stationary in zone 4.0s"
+      ],
+      "status": "ALARM",
+      "timestamp": 7.866666666666666,
+      "track_ids": [
+       2
+      ],
+      "type": "ALARM_START"
+     }
+    ],
+    "statuses": [
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "CLEAR",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "WARNING",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM",
+     "ALARM"
+    ]
+   }
+  },
+  "tracker": {
+   "enters_then_stops": [
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 0.0,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 0.0,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000238418579,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000953674314,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000009536743,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000038146973,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000238418576,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000000000003,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000143051147,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000104037196,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000025142323,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000003334525,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000026199845,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000129951223,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000003405978,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000002804924,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000007713542,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999994094895,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999999498066,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000213680414,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999997646778,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999979537196,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000147951454,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999970975134,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999974324155,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.033333333333333326,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000107594028,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.06666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.9999997030684,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.09999999999999998,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.9999997337855,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.1333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999923424184,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.16666666666666663,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999981753953,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.19999999999999996,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999983464517,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.23333333333333317,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999937318984,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.2666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999955777201,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.30000000000000004,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999983026933,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.33333333333333326,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999938472624,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.3666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999985572893,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.3999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999986925428,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.43333333333333335,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999775531163,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.46666666666666656,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999986925434,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999998302692,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5333333333333332,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999813879688,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000013578452,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.0000001230548,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.6333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999827723354,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.6666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000049221902,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.7,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000026149135,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.7333333333333332,
+       "id": 1,
+       "in_zone": true,
+       "speed": 198.7903228421365,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.7666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 196.45161341082664,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8,
+       "id": 1,
+       "in_zone": true,
+       "speed": 192.61401587837398,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 188.70967769622808,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 182.42491694737862,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 177.41935517711022,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.9333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 168.8542839618891,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.9666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 163.22580777445148,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0,
+       "id": 1,
+       "in_zone": true,
+       "speed": 155.24193588379893,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0333333333333332,
+       "id": 1,
+       "in_zone": true,
+       "speed": 146.77419394831503,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 137.90322719081755,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 128.70967788081015,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.1333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 119.27419400984243,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.1666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 109.677419324075,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.2,
+       "id": 1,
+       "in_zone": true,
+       "speed": 100.00000043069163,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.2333333333333332,
+       "id": 1,
+       "in_zone": true,
+       "speed": 90.32258107585292,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.2666666666666664,
+       "id": 1,
+       "in_zone": true,
+       "speed": 80.72580639008551,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.3,
+       "id": 1,
+       "in_zone": true,
+       "speed": 71.2903229805731,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.3333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 62.09677459347635,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.3666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 53.225806359321844,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.4000000000000001,
+       "id": 1,
+       "in_zone": true,
+       "speed": 38.976641119255774,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.4333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 36.77419391755134,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.4666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 29.354837109965654,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.4999999999999998,
+       "id": 1,
+       "in_zone": true,
+       "speed": 22.580645407399828,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.5333333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 12.01334633153591,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.5666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 11.290320857878655,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.5999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 6.935483994022494,
+       "stationary": 0.033333333333333215,
+       "stuck": 0.033333333333333215,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.633333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 3.548387219828944,
+       "stationary": 0.06666666666666643,
+       "stuck": 0.06666666666666643,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.6666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.10000000000000009,
+       "stuck": 0.10000000000000009,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.7,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.1333333333333333,
+       "stuck": 0.1333333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.7333333333333332,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.16666666666666652,
+       "stuck": 0.16666666666666652,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.7666666666666664,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.19999999999999973,
+       "stuck": 0.19999999999999973,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.8,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.2333333333333334,
+       "stuck": 0.2333333333333334,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.8333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.2666666666666666,
+       "stuck": 0.2666666666666666,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.8666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.2999999999999998,
+       "stuck": 0.2999999999999998,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.9000000000000001,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.3333333333333335,
+       "stuck": 0.3333333333333335,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.9333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.3666666666666667,
+       "stuck": 0.3666666666666667,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.9666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.3999999999999999,
+       "stuck": 0.3999999999999999,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.9999999999999998,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.4333333333333331,
+       "stuck": 0.4333333333333331,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.033333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.4666666666666668,
+       "stuck": 0.4666666666666668,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.0666666666666664,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.5,
+       "stuck": 0.5,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.0999999999999996,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.5333333333333332,
+       "stuck": 0.5333333333333332,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.133333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.5666666666666664,
+       "stuck": 0.5666666666666664,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.166666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.6000000000000001,
+       "stuck": 0.6000000000000001,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.2,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.6333333333333333,
+       "stuck": 0.6333333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.2333333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.6666666666666665,
+       "stuck": 0.6666666666666665,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.2666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.6999999999999997,
+       "stuck": 0.6999999999999997,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.3,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.7333333333333334,
+       "stuck": 0.7333333333333334,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.7666666666666666,
+       "stuck": 0.7666666666666666,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.3666666666666663,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.7999999999999998,
+       "stuck": 0.7999999999999998,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.4000000000000004,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.8333333333333335,
+       "stuck": 0.8333333333333335,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.4333333333333336,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.8666666666666667,
+       "stuck": 0.8666666666666667,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.466666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.8999999999999999,
+       "stuck": 0.8999999999999999,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.5,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.9333333333333331,
+       "stuck": 0.9333333333333331,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.533333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.9666666666666668,
+       "stuck": 0.9666666666666668,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.5666666666666664,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.0,
+       "stuck": 1.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.5999999999999996,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.0333333333333332,
+       "stuck": 1.0333333333333332,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.633333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.0666666666666664,
+       "stuck": 1.0666666666666664,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.1,
+       "stuck": 1.1,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.7,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.1333333333333333,
+       "stuck": 1.1333333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.7333333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.1666666666666665,
+       "stuck": 1.1666666666666665,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.7666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.1999999999999997,
+       "stuck": 1.1999999999999997,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.8,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.2333333333333334,
+       "stuck": 1.2333333333333334,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.833333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.2666666666666666,
+       "stuck": 1.2666666666666666,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.8666666666666663,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.2999999999999998,
+       "stuck": 1.2999999999999998,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.8999999999999995,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.333333333333333,
+       "stuck": 1.333333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.9333333333333336,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.3666666666666667,
+       "stuck": 1.3666666666666667,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.966666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.4,
+       "stuck": 1.4,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.0,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.4333333333333331,
+       "stuck": 1.4333333333333331,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.033333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.4666666666666668,
+       "stuck": 1.4666666666666668,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.0666666666666664,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.5,
+       "stuck": 1.5,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.0999999999999996,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.5333333333333332,
+       "stuck": 1.5333333333333332,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.133333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.5666666666666664,
+       "stuck": 1.5666666666666664,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.166666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.6,
+       "stuck": 1.6,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.2,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.6333333333333333,
+       "stuck": 1.6333333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.2333333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.6666666666666665,
+       "stuck": 1.6666666666666665,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.2666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.6999999999999997,
+       "stuck": 1.6999999999999997,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.3,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.733333333333333,
+       "stuck": 1.733333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.7666666666666662,
+       "stuck": 1.7666666666666662,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.366666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.8000000000000003,
+       "stuck": 1.8000000000000003,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.4000000000000004,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.8333333333333335,
+       "stuck": 1.8333333333333335,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.4333333333333336,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.8666666666666667,
+       "stuck": 1.8666666666666667,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.466666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.9,
+       "stuck": 1.9,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.5,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.9333333333333331,
+       "stuck": 1.9333333333333331,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.533333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.9666666666666663,
+       "stuck": 1.9666666666666663,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.5666666666666664,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 1.9999999999999996,
+       "stuck": 1.9999999999999996,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.6000000000000005,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.0333333333333337,
+       "stuck": 2.0333333333333337,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.6333333333333337,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.066666666666667,
+       "stuck": 2.066666666666667,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.1,
+       "stuck": 2.1,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.7,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.1333333333333333,
+       "stuck": 2.1333333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.7333333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.1666666666666665,
+       "stuck": 2.1666666666666665,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.7666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.1999999999999997,
+       "stuck": 2.1999999999999997,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.8,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.233333333333333,
+       "stuck": 2.233333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.833333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.266666666666666,
+       "stuck": 2.266666666666666,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.866666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.3000000000000003,
+       "stuck": 2.3000000000000003,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.9000000000000004,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.3333333333333335,
+       "stuck": 2.3333333333333335,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.9333333333333336,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.3666666666666667,
+       "stuck": 2.3666666666666667,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 3.966666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.4,
+       "stuck": 2.4,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.0,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.433333333333333,
+       "stuck": 2.433333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.033333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.4666666666666663,
+       "stuck": 2.4666666666666663,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.066666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.4999999999999996,
+       "stuck": 2.4999999999999996,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.1000000000000005,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.5333333333333337,
+       "stuck": 2.5333333333333337,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.133333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.566666666666667,
+       "stuck": 2.566666666666667,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.166666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.6,
+       "stuck": 2.6,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.2,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.6333333333333333,
+       "stuck": 2.6333333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.233333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.6666666666666665,
+       "stuck": 2.6666666666666665,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.266666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.6999999999999997,
+       "stuck": 2.6999999999999997,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.3,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.733333333333333,
+       "stuck": 2.733333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.766666666666666,
+       "stuck": 2.766666666666666,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.366666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.8000000000000003,
+       "stuck": 2.8000000000000003,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.4,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.8333333333333335,
+       "stuck": 2.8333333333333335,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.433333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.8666666666666667,
+       "stuck": 2.8666666666666667,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.466666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.9,
+       "stuck": 2.9,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.5,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.933333333333333,
+       "stuck": 2.933333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.533333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.9666666666666663,
+       "stuck": 2.9666666666666663,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.566666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 2.9999999999999996,
+       "stuck": 2.9999999999999996,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.6000000000000005,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.0333333333333337,
+       "stuck": 3.0333333333333337,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.633333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.066666666666667,
+       "stuck": 3.066666666666667,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.1,
+       "stuck": 3.1,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.7,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.1333333333333333,
+       "stuck": 3.1333333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.733333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.1666666666666665,
+       "stuck": 3.1666666666666665,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.766666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.1999999999999997,
+       "stuck": 3.1999999999999997,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.8,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.233333333333333,
+       "stuck": 3.233333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.833333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.266666666666666,
+       "stuck": 3.266666666666666,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.866666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.3000000000000003,
+       "stuck": 3.3000000000000003,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.9,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.3333333333333335,
+       "stuck": 3.3333333333333335,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.933333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.3666666666666667,
+       "stuck": 3.3666666666666667,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 4.966666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.4,
+       "stuck": 3.4,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 5.0,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.433333333333333,
+       "stuck": 3.433333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 5.033333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.4666666666666663,
+       "stuck": 3.4666666666666663,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 5.066666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.4999999999999996,
+       "stuck": 3.4999999999999996,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 5.1000000000000005,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.5333333333333337,
+       "stuck": 3.5333333333333337,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 5.133333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.566666666666667,
+       "stuck": 3.566666666666667,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 5.166666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.6,
+       "stuck": 3.6,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 5.2,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 3.6333333333333333,
+       "stuck": 3.6333333333333333,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    }
+   ],
+   "ground_plane_homography": [
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 0.0,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 0.0,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 2.000000327825546,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 2.0000003278255463,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 1.99999988079071,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 2.0000000085149496,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 2.0000000404460088,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 1.999999891434397,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 1.9999999403953554,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 1.999999962069772,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 2.000000051476739,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 2.0000000277182437,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 2.0000000674645984,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 2.0000001382041765,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 2.0000000436391145,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 2.00000001621597,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 2.000000029802322,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 2.000000005351501,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 2.0000000141168894,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 2.0000000441432895,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 1.9999999945813962,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 1.9999999772149386,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 1.9999999823895367,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 1.9999999674765965,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999715731696,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.033333333333333326,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999587352462,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.06666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999337362282,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.09999999999999998,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.999999952972033,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.1333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.99999995566354,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.16666666666666663,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999919775728,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.19999999999999996,
+       "id": 1,
+       "in_zone": true,
+       "speed": 2.0000000102145052,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.2333333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999655234537,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.2666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 2.000000006969898,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.30000000000000004,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.999999998541377,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.33333333333333326,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999701976774,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.3666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999691037111,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.3999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999644294864,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.43333333333333335,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999356879805,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.46666666666666656,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999550561751,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.999999955976102,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5333333333333332,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999500090073,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999830269308,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999947124916,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.6333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 2.0000000033647787,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.6666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 2.0000000552785013,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.7,
+       "id": 1,
+       "in_zone": true,
+       "speed": 2.0000000596046443,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.7333333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 2.000000027581237,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.7666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 2.000000063930788,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8,
+       "id": 1,
+       "in_zone": true,
+       "speed": 2.0000000506540028,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 2.0000000177852573,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 2.000000024398787,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 2.000000014901161,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.9333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999917786697,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.9666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 2.0000000062488743,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999990386355,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0333333333333332,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.999999990386348,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999586612949,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999038634768,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.1333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999998721384236,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.1666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.999999906747572,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.2,
+       "id": 1,
+       "in_zone": true,
+       "speed": 1.9999999615453903,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 0.0,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.03333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.1294166506263092,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.06666666666666668,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.08228825510344942,
+       "stationary": 0.03333333333333334,
+       "stuck": 0.03333333333333334,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.1,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.04876421000266437,
+       "stationary": 0.06666666666666667,
+       "stuck": 0.06666666666666667,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.13333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.01798808135143642,
+       "stationary": 0.09999999999999999,
+       "stuck": 0.09999999999999999,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.16666666666666669,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.014098320297680244,
+       "stationary": 0.13333333333333336,
+       "stuck": 0.13333333333333336,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.2,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.016169528686167733,
+       "stationary": 0.16666666666666669,
+       "stuck": 0.16666666666666669,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.23333333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.009278854913783491,
+       "stationary": 0.2,
+       "stuck": 0.2,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.26666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.005524190089157506,
+       "stationary": 0.23333333333333334,
+       "stuck": 0.23333333333333334,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.3,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.006673947115707442,
+       "stationary": 0.26666666666666666,
+       "stuck": 0.26666666666666666,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.3333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.01175563578025716,
+       "stationary": 0.3,
+       "stuck": 0.3,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.3666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.008325542699096923,
+       "stationary": 0.33333333333333337,
+       "stuck": 0.33333333333333337,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.4,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.003959710226736795,
+       "stationary": 0.3666666666666667,
+       "stuck": 0.3666666666666667,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.43333333333333335,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0062012212521173355,
+       "stationary": 0.4,
+       "stuck": 0.4,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.4666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.007820350479636968,
+       "stationary": 0.43333333333333335,
+       "stuck": 0.43333333333333335,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0063831424957559585,
+       "stationary": 0.4666666666666667,
+       "stuck": 0.4666666666666667,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.004885574273109858,
+       "stationary": 0.5,
+       "stuck": 0.5,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.005332568278896831,
+       "stationary": 0.5333333333333333,
+       "stuck": 0.5333333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.6,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0028011913067601613,
+       "stationary": 0.5666666666666667,
+       "stuck": 0.5666666666666667,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.6333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0010543465037422502,
+       "stationary": 0.6,
+       "stuck": 0.6,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.6666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0014665807004746749,
+       "stationary": 0.6333333333333333,
+       "stuck": 0.6333333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.7,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0011136087288075211,
+       "stationary": 0.6666666666666666,
+       "stuck": 0.6666666666666666,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.7333333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.001619152488294442,
+       "stationary": 0.7000000000000001,
+       "stuck": 0.7000000000000001,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.7666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0010946895794671483,
+       "stationary": 0.7333333333333334,
+       "stuck": 0.7333333333333334,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.00221701252403184,
+       "stationary": 0.7666666666666667,
+       "stuck": 0.7666666666666667,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8333333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0028220069927773444,
+       "stationary": 0.8,
+       "stuck": 0.8,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0033571754060459725,
+       "stationary": 0.8333333333333334,
+       "stuck": 0.8333333333333334,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.9,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.00247166911882274,
+       "stationary": 0.8666666666666667,
+       "stuck": 0.8666666666666667,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.9333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0022015484593387656,
+       "stationary": 0.9,
+       "stuck": 0.9,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.9666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0017699564973343098,
+       "stationary": 0.9333333333333333,
+       "stuck": 0.9333333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0023124936212938624,
+       "stationary": 0.9666666666666668,
+       "stuck": 0.9666666666666668,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0333333333333332,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0025977947688852862,
+       "stationary": 1.0,
+       "stuck": 1.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0021011556468433262,
+       "stationary": 1.0333333333333334,
+       "stuck": 1.0333333333333334,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0011240206965727527,
+       "stationary": 1.0666666666666667,
+       "stuck": 1.0666666666666667,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.1333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.002430980186847112,
+       "stationary": 1.1,
+       "stuck": 1.1,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.1666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0025716040089159026,
+       "stationary": 1.1333333333333333,
+       "stuck": 1.1333333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.2,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.004309845849854884,
+       "stationary": 1.1666666666666667,
+       "stuck": 1.1666666666666667,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.2333333333333332,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.004085002874127985,
+       "stationary": 1.2,
+       "stuck": 1.2,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.2666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.002735893901590358,
+       "stationary": 1.2333333333333334,
+       "stuck": 1.2333333333333334,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.2999999999999998,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.003104075712311929,
+       "stationary": 1.2666666666666666,
+       "stuck": 1.2666666666666666,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.3333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.00222761021709697,
+       "stationary": 1.3,
+       "stuck": 1.3,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.3666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.00259277502102123,
+       "stationary": 1.3333333333333333,
+       "stuck": 1.3333333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.4,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.002802976167069276,
+       "stationary": 1.3666666666666667,
+       "stuck": 1.3666666666666667,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.4333333333333331,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.002901746162278076,
+       "stationary": 1.4,
+       "stuck": 1.4,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.4666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0026932974446642875,
+       "stationary": 1.4333333333333333,
+       "stuck": 1.4333333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.5,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0024911431457064473,
+       "stationary": 1.4666666666666668,
+       "stuck": 1.4666666666666668,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.5333333333333332,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.003075658627060312,
+       "stationary": 1.5,
+       "stuck": 1.5,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.5666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.004497732863625186,
+       "stationary": 1.5333333333333334,
+       "stuck": 1.5333333333333334,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.5999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.004425474344852302,
+       "stationary": 1.5666666666666667,
+       "stuck": 1.5666666666666667,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.6333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.004027242762289408,
+       "stationary": 1.6,
+       "stuck": 1.6,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.6666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0030738037169011083,
+       "stationary": 1.6333333333333333,
+       "stuck": 1.6333333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.7,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0035316353552879744,
+       "stationary": 1.6666666666666667,
+       "stuck": 1.6666666666666667,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.7333333333333332,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.00393033369396215,
+       "stationary": 1.7,
+       "stuck": 1.7,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.7666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.005228514842166233,
+       "stationary": 1.7333333333333334,
+       "stuck": 1.7333333333333334,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.7999999999999998,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.004906845586866076,
+       "stationary": 1.7666666666666666,
+       "stuck": 1.7666666666666666,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.8333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.00461893934205991,
+       "stationary": 1.8,
+       "stuck": 1.8,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.8666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0031181607123834756,
+       "stationary": 1.8333333333333333,
+       "stuck": 1.8333333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.9,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0022783010600033234,
+       "stationary": 1.8666666666666667,
+       "stuck": 1.8666666666666667,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.9333333333333331,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0024897192284276943,
+       "stationary": 1.9,
+       "stuck": 1.9,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.9666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0024444176614799532,
+       "stationary": 1.9333333333333333,
+       "stuck": 1.9333333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.9999999999999998,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.002876362344346537,
+       "stationary": 1.9666666666666666,
+       "stuck": 1.9666666666666666,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.0333333333333337,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0017868978581578225,
+       "stationary": 2.0,
+       "stuck": 2.0,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.066666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0013138765949981441,
+       "stationary": 2.033333333333333,
+       "stuck": 2.033333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.1,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.002365211717894617,
+       "stationary": 2.0666666666666664,
+       "stuck": 2.0666666666666664,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.1333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.003609813626861844,
+       "stationary": 2.0999999999999996,
+       "stuck": 2.0999999999999996,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.166666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.003930811835967354,
+       "stationary": 2.1333333333333333,
+       "stuck": 2.1333333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.2,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0044589394267862915,
+       "stationary": 2.1666666666666665,
+       "stuck": 2.1666666666666665,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.2333333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0030916218759150594,
+       "stationary": 2.1999999999999997,
+       "stuck": 2.1999999999999997,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.2666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.00243095435630548,
+       "stationary": 2.233333333333333,
+       "stuck": 2.233333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.3000000000000003,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.00159062602202566,
+       "stationary": 2.2666666666666666,
+       "stuck": 2.2666666666666666,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.3333333333333335,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.000775850357106137,
+       "stationary": 2.3,
+       "stuck": 2.3,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.3666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0014604740211761416,
+       "stationary": 2.333333333333333,
+       "stuck": 2.333333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.4,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.002906701943631189,
+       "stationary": 2.3666666666666663,
+       "stuck": 2.3666666666666663,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.4333333333333336,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.004933999187972881,
+       "stationary": 2.4,
+       "stuck": 2.4,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.466666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.00480052415464679,
+       "stationary": 2.433333333333333,
+       "stuck": 2.433333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.5,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.005063284393000068,
+       "stationary": 2.4666666666666663,
+       "stuck": 2.4666666666666663,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.5333333333333337,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0031670875211359598,
+       "stationary": 2.5,
+       "stuck": 2.5,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.566666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.003414880394288001,
+       "stationary": 2.533333333333333,
+       "stuck": 2.533333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.6,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0030790387000717515,
+       "stationary": 2.5666666666666664,
+       "stuck": 2.5666666666666664,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.6333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.00310297065764434,
+       "stationary": 2.5999999999999996,
+       "stuck": 2.5999999999999996,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0038873256097208203,
+       "stationary": 2.6333333333333333,
+       "stuck": 2.6333333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.7,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0033047176335021253,
+       "stationary": 2.6666666666666665,
+       "stuck": 2.6666666666666665,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.7333333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0033705382745890253,
+       "stationary": 2.6999999999999997,
+       "stuck": 2.6999999999999997,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.7666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.002103303027623592,
+       "stationary": 2.733333333333333,
+       "stuck": 2.733333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.8000000000000003,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0008969240496975937,
+       "stationary": 2.7666666666666666,
+       "stuck": 2.7666666666666666,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.8333333333333335,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.001766297702235719,
+       "stationary": 2.8,
+       "stuck": 2.8,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.8666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.00197402774064265,
+       "stationary": 2.833333333333333,
+       "stuck": 2.833333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.9,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.002678488243697034,
+       "stationary": 2.8666666666666663,
+       "stuck": 2.8666666666666663,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.9333333333333336,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.001932887443055279,
+       "stationary": 2.9,
+       "stuck": 2.9,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 2.966666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 0.0020643812078723,
+       "stationary": 2.933333333333333,
+       "stuck": 2.933333333333333,
+       "units": "m/s"
+      }
+     ],
+     "occupied": true
+    }
+   ],
+   "moving_car": [
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 0.0,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 0.0,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000238418579,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000953674314,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000009536743,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000038146973,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000238418576,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000000000003,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000143051147,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000104037196,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000025142323,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000003334525,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000026199845,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000129951223,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000003405978,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000002804924,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000007713542,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999994094895,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999999498066,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000213680414,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999997646778,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999979537196,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000147951454,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999997097513,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999974324155,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.033333333333333326,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000107594028,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.06666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999970306843,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.09999999999999998,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999973378553,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.1333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999923424184,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.16666666666666663,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999981753953,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.19999999999999996,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999983464517,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.2333333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999899646727,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.2666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.999999557772,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.30000000000000004,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999983026936,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.33333333333333326,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.9999993847262,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.3666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999985572893,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.3999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.9999998692543,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.43333333333333335,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999775531163,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.46666666666666656,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999986925434,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999998302692,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5333333333333332,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999813879688,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000013578452,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000012305478,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.6333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999827723354,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.6666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000049221902,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.7,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000026149135,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.7333333333333334,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999858274876,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.7666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.0000006306556,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000044129982,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999855410672,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000064497664,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000058451008,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.9333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999972843096,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.9666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.0000016920028,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000076909222,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0333333333333332,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999892327094,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000187658495,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.0000009536743,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.1333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999910785306,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.1666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000058451008,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.2,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.0000010459654,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999920014415,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000125600712,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000113825644,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999992924352,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000076909222,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000135784552,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000215345813,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999920014412,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000010459654,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000003394615,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.999999015562,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000008613833,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000178429391,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000007468151,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000006768011,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000436844365,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000033946142,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000003076369,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000399927936,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999980926513,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999993210778,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000363011517,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999772348713,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999956930841,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000135784555,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999973543228,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999920014412,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000028917867,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999987100468,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 2.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999883097988,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    }
+   ],
+   "predicted_box_membership": [
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 0.0,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 0.0,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999523162842,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999809265134,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000381469727,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999991144453,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999931880404,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999960831234,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999976158145,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999998266047,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999770251185,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999991330233,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999939740363,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999903584575,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999977861128,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999985975379,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999842223,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999981103667,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999851929513,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999938333843,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999904013302,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999924610725,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999982566226,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999995107236,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999962219826,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000003912513,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999988559402,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999990447597,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000025603578,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999927015804,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999939049442,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.0,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999939049442,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": true,
+       "speed": 197.39130384394707,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    }
+   ],
+   "zone_empty_since": [
+    {
+     "empty_since": 0.5,
+     "objects": [],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 0.0,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 0.0,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00002384185794,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000953674308,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000095367434,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000038146973,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000238418582,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000000000003,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000014305115,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.000001040372,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000251423234,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000033345253,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000002619985,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000129951235,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000003405978,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000002804921,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000077135425,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999994094895,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999999498066,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000213680414,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999976467777,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999979537202,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000014795145,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 0.5,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999970975134,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999974324157,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.03333333333333344,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000107594028,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.06666666666666665,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999970306843,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.09999999999999987,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999973378553,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.1333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999923424176,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.16666666666666674,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.9999998175395,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.19999999999999996,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.9999998346452,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.23333333333333317,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.9999993731899,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.2666666666666664,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999955777201,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.30000000000000004,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999984618157,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.33333333333333326,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999938472627,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.3666666666666669,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999985572896,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.40000000000000013,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.9999998557289,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.43333333333333335,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999802343305,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.46666666666666656,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999986925428,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.4999999999999998,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.9999999846182,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.533333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999813879694,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000035378244,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.5999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000012305478,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.6333333333333335,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999842999117,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.6666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000049221896,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.7,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000026149135,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.7333333333333332,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999841567006,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.7666666666666664,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.0000006306556,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.0000003999279,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.9999985541067,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.8666666666666669,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000064497664,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.9000000000000001,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.0000006449766,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.9333333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999873868876,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.9666666666666666,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000169200283,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 0.9999999999999998,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000076909222,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.033333333333333,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.99999892327094,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000187658495,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.0999999999999999,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000095367437,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.1333333333333335,
+       "id": 1,
+       "in_zone": true,
+       "speed": 199.9999985572891,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.1666666666666667,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.00000058451008,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": null,
+     "objects": [
+      {
+       "dwell": 1.2,
+       "id": 1,
+       "in_zone": true,
+       "speed": 200.0000010459654,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": true
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999920014412,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000125600715,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000011382564,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999992924352,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000076909217,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000123054753,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000021534581,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999992001441,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000104596535,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000000339462,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.999999015562,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000008613833,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000178429391,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999883097993,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000006768012,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000436844365,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000003394614,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000003076369,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000399927936,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999809265134,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999993847263,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000363011503,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999977234871,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999995693084,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.00000135784555,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.9999973543228,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999920014412,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 200.0000028917867,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999698515862,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    },
+    {
+     "empty_since": 3.033333333333333,
+     "objects": [
+      {
+       "dwell": 0.0,
+       "id": 1,
+       "in_zone": false,
+       "speed": 199.99999883097988,
+       "stationary": 0.0,
+       "stuck": 0.0,
+       "units": "px/s"
+      }
+     ],
+     "occupied": false
+    }
+   ]
+  }
+ }
+}

@@ -8,14 +8,18 @@ What an operator needs to see at a glance, in priority order:
 
 1. The **status banner** (CLEAR / WARNING / ALARM) with the reasons the engine gave.
 2. The **zone polygon** and whether it can be trusted (green = freshly estimated,
-   red = held from the last healthy estimate because the stabilizer lost track).
+   red = not trustworthy: held from the last healthy estimate because the stabilizer
+   lost track - "HELD" - or not anchored yet, the uncalibrated config polygon while the
+   first frames are featureless - "NOT ANCHORED").
 3. Each **tracked object** with its id, class, speed and stuck time, coloured by the
    severity the alert engine assigned to *that id* (red alarm, orange warning); trains
    and unmapped classes are grey so it is obvious they are ignored by the stuck logic.
 4. **Debris blobs** in magenta, drawn from the connected-component rectangles the
    debris detector already computed (no per-frame mask blending: the overlay must stay
    cheap on a Jetson, where every millisecond is detector time).
-5. Gate state and a one-line zone-health / timing readout.
+5. Gate state and a one-line zone-health / timing readout, then ``DEGRADED: <reasons>``
+   in orange while the monitor cannot fully see (``FrameResult.degraded``): a CLEAR
+   banner above it means "nothing seen", not "nothing there".
 
 All text is ASCII. Nothing here calls ``cv2.imshow``; the monitor owns the window.
 """
@@ -26,6 +30,7 @@ from typing import Dict, Optional, Sequence, Tuple
 import cv2
 import numpy as np
 
+from .alerting import ascii_safe
 from .tracking import PredictedDetection
 from .types import FrameResult, ObjectState, Status
 
@@ -48,15 +53,14 @@ STATUS_COLORS = {
 _FONT = cv2.FONT_HERSHEY_SIMPLEX
 
 
-def _ascii(text: str) -> str:
-    """Hershey fonts only cover ASCII; replace anything else so labels never show garbage."""
-    return text.encode("ascii", "replace").decode("ascii")
-
-
 def _put_text(img: np.ndarray, text: str, org: Tuple[int, int], scale: float,
               color: Tuple[int, int, int], thickness: int = 1) -> None:
-    """Text with a thin dark outline so it stays readable on any background."""
-    text = _ascii(text)
+    """Text with a thin dark outline so it stays readable on any background.
+
+    Hershey fonts only cover ASCII, so anything else is replaced (``alerting.ascii_safe``)
+    and labels never show garbage.
+    """
+    text = ascii_safe(text)
     cv2.putText(img, text, org, _FONT, scale, COLOR_SHADOW, thickness + 2, cv2.LINE_AA)
     cv2.putText(img, text, org, _FONT, scale, color, thickness, cv2.LINE_AA)
 
@@ -80,23 +84,32 @@ def object_color(obj: Optional[ObjectState], warning_ids: Sequence[int],
 
 
 def object_label(obj: Optional[ObjectState], cls_name: str, track_id: Optional[int]) -> str:
-    """``id cls speed stuck_s`` for a box; falls back to the raw detection when untracked."""
+    """``id cls speed stuck_s`` for a box; falls back to the raw detection when untracked.
+
+    The class is suffixed ``*`` when the object is in the zone and ``+`` when it is a
+    vehicle stopped near it ("too close").
+    """
     if obj is None:
         tid = "?" if track_id is None else str(track_id)
         return f"{tid} {cls_name}"
     units = "m/s" if obj.speed_units == "m/s" else "px/s"
     speed = f"{obj.speed:.1f}{units}" if units == "m/s" else f"{obj.speed:.0f}{units}"
-    zone_flag = "*" if obj.in_zone else ""
+    zone_flag = "*" if obj.in_zone else ("+" if obj.near_zone else "")
     return f"{obj.track_id} {obj.cls_name}{zone_flag} {speed} {obj.stuck_seconds:.1f}s"
 
 
 def draw_overlay(frame_bgr: np.ndarray, result: FrameResult,
-                 fps_estimate: Optional[float] = None) -> np.ndarray:
+                 fps_estimate: Optional[float] = None,
+                 footprint_fraction: Optional[float] = None) -> np.ndarray:
     """Return a copy of ``frame_bgr`` annotated with everything in ``result``.
 
     ``frame_bgr`` must be at the *processing* resolution (the one ``result`` was computed
     at), otherwise the polygon and boxes land in the wrong place. Cost is a handful of
     ``cv2.polylines``/``rectangle``/``putText`` calls; no full-frame mask is blended.
+
+    ``footprint_fraction`` (the tracker's ``stuck.footprint_fraction`` when
+    ``zone_test="footprint"``) draws, for vehicles, the bottom strip of the box that is
+    tested against the zone; without it, or for other classes, the bottom-center dot.
     """
     img = frame_bgr.copy()
     if img.ndim == 2:
@@ -140,9 +153,14 @@ def draw_overlay(frame_bgr: np.ndarray, result: FrameResult,
         if predicted:
             label = "~" + label
         _put_text(img, label, (x1, max(line_h, y1 - 4)), scale * 0.6, color, thick)
-        # Bottom-center dot: the point that is actually tested against the zone.
-        cx, cy = det.bottom_center
-        cv2.circle(img, (int(round(cx)), int(round(cy))), max(2, thick + 1), color, -1)
+        # What is actually tested against the zone: the footprint strip for vehicles under
+        # the footprint rule, the bottom-center point for everything else.
+        if footprint_fraction and obj is not None and obj.is_vehicle:
+            fy = int(round(y2 - float(footprint_fraction) * (y2 - y1)))
+            cv2.rectangle(img, (x1, fy), (x2, y2), color, 1)
+        else:
+            cx, cy = det.bottom_center
+            cv2.circle(img, (int(round(cx)), int(round(cy))), max(2, thick + 1), color, -1)
 
     # ---- status banner
     banner_h = line_h + 6
@@ -167,7 +185,8 @@ def draw_overlay(frame_bgr: np.ndarray, result: FrameResult,
     _put_text(img, gate_txt, (8, banner_h + line_h), scale * 0.6, gate_color, thick)
 
     if zone is not None:
-        health = f"zone {zone.method} {zone.inliers} inl {'ok' if zone.healthy else 'HELD'}"
+        state = "ok" if zone.healthy else ("NOT ANCHORED" if zone.method == "uninitialized" else "HELD")
+        health = f"zone {zone.method} {zone.inliers} inl {state}"
         health_color = COLOR_TEXT if zone.healthy else COLOR_ALARM
     else:
         health, health_color = "zone n/a", COLOR_OTHER
@@ -176,6 +195,12 @@ def draw_overlay(frame_bgr: np.ndarray, result: FrameResult,
     if fps_estimate is not None and fps_estimate > 0:
         perf += f" {fps_estimate:.1f} fps"
     _put_text(img, f"{health}  {perf}", (8, banner_h + 2 * line_h), scale * 0.6, health_color, thick)
+
+    if result.degraded:
+        degraded = "DEGRADED: " + ("; ".join(result.degraded_reasons) or "-")
+        if len(degraded) > max_chars:
+            degraded = degraded[: max_chars - 3] + "..."
+        _put_text(img, degraded, (8, banner_h + 3 * line_h), scale * 0.6, COLOR_WARNING, thick)
 
     if assessment.latched_until is not None and "latched" in assessment.reasons:
         _put_text(img, "LATCHED", (w - int(120 * scale) - 8, banner_h + line_h), scale * 0.7, COLOR_ALARM, thick)

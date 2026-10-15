@@ -19,7 +19,9 @@ What this tool does differently
    ``epochs`` (per iteration) and ``iterations``. Defaults 20/20 are a compromise: the fitness of
    an iteration is only meaningful if its short training run got past warm-up.
 3. Reads the tuner's results file (``tune_results.csv`` on ultralytics 8.3, ``tune_results.ndjson``
-   on 8.4) and **exits non-zero if the best fitness is 0**, renaming the useless
+   on 8.4) from the directory this run wrote - ``--project`` is handed over as an absolute path,
+   because 8.4 nests a relative one under its own ``runs_dir`` - and never from an older run's
+   directory. It **exits non-zero if the best fitness is 0**, renaming the useless
    ``best_hyperparameters.yaml`` to ``best_hyperparameters.INVALID.yaml`` so it cannot be picked
    up by ``train_vehicle.py --cfg`` by accident. With a valid result it optionally copies the file
    to ``--out``.
@@ -39,96 +41,63 @@ import argparse
 import csv
 import json
 import math
+import os
+import re
 import shutil
 import sys
+import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 
-class DatasetError(RuntimeError):
-    """Raised when the dataset YAML is missing or its split entries do not resolve."""
+TOOLS_DIR = Path(__file__).resolve().parent
+if str(TOOLS_DIR) not in sys.path:
+    sys.path.insert(0, str(TOOLS_DIR))  # the shared helper below also works when this file is loaded by path
+
+from _dataset_yaml import DatasetError, resolve_splits  # noqa: E402  (shared with train_vehicle.py)
 
 
-def _load_yaml(path: Path) -> Dict[str, Any]:
-    import yaml  # PyYAML is a runtime requirement of the package; imported here for --help speed
-
-    with open(str(path), "r", encoding="utf-8") as fh:
-        data = yaml.safe_load(fh) or {}
-    if not isinstance(data, dict):
-        raise DatasetError("{} does not contain a mapping".format(path))
-    return data
+# Files the tuner appends one row per iteration to: ultralytics 8.4 / 8.3 and older.
+RESULT_FILES = ("tune_results.ndjson", "tune_results.csv")
+# A results file older than the start of this tuning run (minus file-system mtime granularity,
+# 2 s on FAT) belongs to an earlier run.
+STALE_SLACK_S = 2.0
 
 
-def _dataset_root(yaml_path: Path, data: Dict[str, Any]) -> Path:
-    """Directory that relative split entries are resolved against (ultralytics semantics).
+def _results_mtime(directory: Path) -> Optional[float]:
+    """Modification time of the newest tuner results file in ``directory`` (None: there is none)."""
+    times = [f.stat().st_mtime for f in (directory / n for n in RESULT_FILES) if f.is_file()]
+    return max(times) if times else None
 
-    ultralytics uses the ``path`` key when present, else the YAML's own directory. A relative
-    ``path`` is tried against the YAML directory first and then the ultralytics DATASETS_DIR
-    setting (what ultralytics itself does) when that is available.
+
+def find_tune_dir(project: str, name: str, since: Optional[float] = None) -> Optional[Path]:
+    """Locate the directory the tuner wrote its results to, or None.
+
+    ultralytics writes ``<project>/<name>`` and appends 2, 3... when that exists; versions
+    before 8.3 ignore ``name`` and always write ``tune``, ``tune2``... Only directories that
+    hold a results file count, and the one written last wins. With ``since`` (``time.time()``
+    taken before tuning started) a results file older than that is a previous run's, so a
+    stale directory is never reported as this run's result.
+
+    ``project`` must be the directory ultralytics was given *as an absolute path*: 8.4 nests
+    a relative project under ``SETTINGS['runs_dir']/<task>/`` (``runs/detect/runs/tune/...``)
+    while 8.3 resolves it against the working directory, so :func:`planned_call` makes it absolute.
     """
-    raw = data.get("path")
-    if not raw:
-        return yaml_path.parent
-    root = Path(str(raw))
-    if root.is_absolute():
-        return root
-    candidate = (yaml_path.parent / root).resolve()
-    if candidate.exists():
-        return candidate
-    try:
-        from ultralytics.utils import DATASETS_DIR  # optional; only for parity with ultralytics
-
-        alt = (Path(DATASETS_DIR) / root).resolve()
-        if alt.exists():
-            return alt
-    except Exception:
-        pass
-    return candidate
-
-
-def resolve_splits(yaml_path: str, required: Tuple[str, ...] = ("train", "val")) -> Dict[str, List[Path]]:
-    """Return {split: [resolved paths]} for train/val/test; raise DatasetError on any problem."""
-    p = Path(yaml_path)
-    if not p.is_file():
-        raise DatasetError("dataset yaml not found: {} (cwd={})".format(p, Path.cwd()))
-    data = _load_yaml(p)
-    root = _dataset_root(p, data)
-    problems: List[str] = []
-    resolved: Dict[str, List[Path]] = {}
-    for split in ("train", "val", "test"):
-        entry = data.get(split)
-        if entry is None:
-            if split in required:
-                problems.append("'{}:' key missing".format(split))
-            continue
-        entries = entry if isinstance(entry, (list, tuple)) else [entry]
-        paths: List[Path] = []
-        for e in entries:
-            ep = Path(str(e))
-            if not ep.is_absolute():
-                ep = root / ep
-            if not ep.exists():
-                problems.append("'{}' entry {} does not exist (resolved against {})".format(split, ep, root))
-            paths.append(ep)
-        resolved[split] = paths
-    if "names" not in data and "nc" not in data:
-        problems.append("neither 'names' nor 'nc' present")
-    if problems:
-        raise DatasetError("dataset yaml {} is not usable:\n  - {}".format(p, "\n  - ".join(problems)))
-    return resolved
-
-
-def find_tune_dir(project: str, name: str) -> Optional[Path]:
-    """Locate the directory the tuner wrote (ultralytics may append 2, 3... to ``name``)."""
     base = Path(project)
     if not base.is_dir():
         return None
-    candidates = [d for d in base.iterdir() if d.is_dir() and d.name.startswith(name)]
-    if not candidates:
-        return None
-    # newest first; the run that just finished is the most recently modified one
-    candidates.sort(key=lambda d: d.stat().st_mtime, reverse=True)
-    return candidates[0]
+    pattern = re.compile(r"(?:{}|tune)\d*".format(re.escape(name)))
+    found: Optional[Path] = None
+    found_mtime = -math.inf
+    for d in base.iterdir():
+        if not d.is_dir() or not pattern.fullmatch(d.name):
+            continue
+        mtime = _results_mtime(d)
+        if mtime is None or (since is not None and mtime < since - STALE_SLACK_S):
+            continue
+        if mtime > found_mtime:
+            found, found_mtime = d, mtime
+    return found
 
 
 def read_fitness(tune_dir: Path) -> List[float]:
@@ -202,7 +171,8 @@ def planned_call(args: argparse.Namespace) -> Dict[str, Any]:
         "device": args.device or None,
         "workers": int(args.workers),
         "seed": int(args.seed),
-        "project": args.project,
+        # absolute, so every ultralytics version writes to the same place (see find_tune_dir)
+        "project": os.path.abspath(args.project),  # not Path.resolve(): relative on py3.8/Windows
         "name": args.name,
         "val": True,  # the fix: without validation every iteration scores fitness 0
         "plots": False,
@@ -234,14 +204,20 @@ def main(argv: Optional[List[str]] = None) -> int:
     try:
         from ultralytics import YOLO
     except ImportError:
-        print("ERROR: ultralytics is not installed (pip install ultralytics)", file=sys.stderr)
+        print("ERROR: ultralytics is not installed. From a checkout: pip install -r requirements.txt (headless "
+              "OpenCV; the same as pip install \".[detector]\") or -r requirements-display.txt (GUI OpenCV); not a "
+              "bare 'pip install ultralytics', which adds the GUI opencv-python next to the headless one",
+              file=sys.stderr)
         return 2
     model = YOLO(args.model)
+    started = time.time()
     model.tune(**call)
 
-    tune_dir = find_tune_dir(args.project, args.name)
+    # --resume of a finished search writes nothing new, so only a fresh run filters by age
+    tune_dir = find_tune_dir(call["project"], args.name, since=None if args.resume else started)
     if tune_dir is None:
-        print("ERROR: tuning finished but no run directory found under {}".format(args.project), file=sys.stderr)
+        print("ERROR: tuning finished but no {} written by this run was found in {}/{}*".format(
+            " / ".join(RESULT_FILES), call["project"], args.name), file=sys.stderr)
         return 1
     try:
         fitness = read_fitness(tune_dir)

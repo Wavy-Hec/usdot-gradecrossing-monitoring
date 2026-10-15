@@ -1,0 +1,22 @@
+{
+ "vertices": [
+  [
+   0,
+   207
+  ],
+  [
+   640,
+   203
+  ],
+  [
+   640,
+   224
+  ],
+  [
+   0,
+   228
+  ]
+ ],
+ "source": "hand-drawn",
+ "note": "danger zone in source pixels"
+}

@@ -31,7 +31,9 @@ Jetson notes
    architecture that built it (Orin != Xavier != Nano, JetPack 5 != JetPack 6). An engine exported
    on a desktop GPU will not load on the Jetson. Copy best.pt to the Jetson and run this tool there.
 2. Software on the Jetson: use the torch/torchvision wheels NVIDIA publishes for your JetPack,
-   then `pip install ultralytics`. TensorRT itself ships with JetPack - do NOT `pip install tensorrt`.
+   then `pip install -r requirements.txt` from the checkout (ultralytics built against the headless
+   OpenCV; a bare `pip install ultralytics` adds the GUI opencv-python next to it). TensorRT itself
+   ships with JetPack - do NOT `pip install tensorrt`.
 3. Precision: --half (FP16) is the sweet spot on Jetson tensor cores (Orin/Xavier): ~2x faster than
    FP32 with negligible accuracy change. --int8 is faster again but needs --data for calibration and
    can lose recall on small/far vehicles; SAFETY: re-validate an INT8 engine on the test split with
@@ -123,7 +125,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     try:
         from ultralytics import YOLO
     except ImportError:
-        print("ERROR: ultralytics is not installed (pip install ultralytics)", file=sys.stderr)
+        print("ERROR: ultralytics is not installed. From a checkout: pip install -r requirements.txt (headless "
+              "OpenCV; the same as pip install \".[detector]\") or -r requirements-display.txt (GUI OpenCV); not a "
+              "bare 'pip install ultralytics', which adds the GUI opencv-python next to the headless one",
+              file=sys.stderr)
         return 2
     model = YOLO(args.weights)
     try:

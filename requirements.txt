@@ -1,10 +1,13 @@
-# Runtime dependencies of the gradecrossing package (Python >= 3.8).
-# 3.8 is the floor because JetPack 5 Jetsons ship Python 3.8; the package is 3.8-syntax
-# clean and uses no 3.9+ runtime API (tests/test_monitor.py pins that with an ast check).
-# It is developed on 3.9-3.12. On Jetson install torch/torchvision from NVIDIA's wheels
-# first, then these.
+# The full monitor with headless OpenCV, the default (Jetson, Colab, servers):
+#     pip install -r requirements.txt            (from a checkout; or: pip install ".[detector]")
+# Same list as pyproject.toml's base dependencies + the [detector] extra; tests/test_packaging.py
+# keeps them in step. For an OpenCV window (--display, the click-to-draw zone editor) use
+# requirements-display.txt INSTEAD - never both, the two OpenCV builds share one cv2/ directory.
+# Python >= 3.8: JetPack 5 Jetsons ship 3.8 and the package is 3.8-clean (tests/test_monitor.py
+# pins that with an ast check); it is developed on 3.9-3.12. On a Jetson install NVIDIA's
+# torch/torchvision wheels first, then these.
 numpy>=1.24
-opencv-python>=4.8,<5
-ultralytics>=8.3
 pyyaml>=6
+opencv-python-headless>=4.8
+ultralytics-opencv-headless>=8.3.242  # ultralytics published against opencv-python-headless; same `ultralytics` import
 lap>=0.5.12          # linear assignment used by the ultralytics ByteTrack/BoT-SORT trackers

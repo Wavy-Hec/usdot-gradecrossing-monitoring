@@ -1,0 +1,14 @@
+# The full monitor with a GUI OpenCV, for --display (cv2.imshow) and the click-to-draw zone
+# editor of tools/calibrate_zone.py, on a machine with a screen. Use it INSTEAD of requirements.txt:
+#     pip install -r requirements-display.txt    (from a checkout; or: pip install ".[display]")
+# Same list as pyproject.toml's base dependencies + the [display] extra; tests/test_packaging.py
+# keeps them in step. Never install it on top of requirements.txt / [detector] / [headless]:
+# opencv-python and opencv-python-headless unpack into the same cv2/ directory, pip keeps
+# whichever came last and uninstalling either one breaks cv2. To switch an environment that
+# has the headless build, remove it first:
+#     pip uninstall -y opencv-python-headless ultralytics-opencv-headless
+numpy>=1.24
+pyyaml>=6
+opencv-python>=4.8
+ultralytics>=8.3     # depends on opencv-python itself
+lap>=0.5.12          # linear assignment used by the ultralytics ByteTrack/BoT-SORT trackers

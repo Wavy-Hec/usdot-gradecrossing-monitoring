@@ -1,6 +1,8 @@
-# Test dependencies. The suite runs on CPU with synthetic frames; no model download is needed.
+# Test dependencies (the [dev] extra), installed on top of the runtime file you chose,
+# requirements.txt or requirements-display.txt. No OpenCV line here on purpose: a second OpenCV
+# build would land in the same cv2/ directory as the first.
+#     pip install -r requirements-dev.txt && python -m pytest tests -q
+# The suite runs on CPU with synthetic frames and needs no model download; the detector tests
+# skip without ultralytics, so a torch-free test environment is just
+#     pip install ".[headless,dev]"
 pytest>=7
-# opencv-python-headless replaces opencv-python in CI / on servers without a display
-# (same API minus the GUI). Do not install both: pip keeps whichever came last, and
-# cv2.imshow either works or raises cv2.error, which the monitor handles.
-opencv-python-headless>=4.8,<5

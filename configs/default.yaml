@@ -1,13 +1,20 @@
 # Default configuration for the grade-crossing monitor.
 #
-# Every value here equals the dataclass default in gradecrossing/config.py (a test pins
-# that, so this file is always an accurate reference). Copy it, change what you need
-# and run:  python -m gradecrossing.monitor --config configs/mysite.yaml
+# Every key of gradecrossing/config.py is listed here with its dataclass default (tests pin
+# both the key set and the values, so this file is always an accurate reference). To set up
+# a site, keep only the keys you change (tools/calibrate_zone.py writes such a file): a copy
+# of every key would also pin defaults that a later release improves. Then run:
+#   python -m gradecrossing.monitor --config configs/mysite.yaml
 #
 # Rules of thumb: areas are fractions of the zone area, times are seconds, speeds are
 # pixels/second at the processing resolution (metres/second if stuck.ground_plane_homography
-# is set). Nothing is a pixel count, so a config transfers between cameras.
-# Unknown keys are an error (load_config raises), which catches typos early.
+# is set). A few keys are pixel counts and are worth re-checking on a camera whose processed
+# resolution is very different: the zone stabiliser's feature/LK/RANSAC sizes and its
+# max_step_px, deadzone_px and reanchor_max_drift_px, and debris.exclusion_dilate_px /
+# morph_kernel (pixels at debris.process_width).
+# Unknown keys are an error (load_config raises), which catches typos early; a key that an
+# earlier release had and this one does not says what replaced it, and a key still set to
+# an earlier release's default that has changed since loads with a warning.
 
 video:
   source: "0"                 # file path, RTSP/HTTP URL, or camera index as a string ("0")
@@ -17,12 +24,36 @@ video:
   max_frames: null            # stop after N frames (null = run to the end / forever)
   loop: false                 # loop a file (soak tests); all state is reset at each restart
   live: null                  # null = auto (URLs and camera indices are live, paths are files)
+  stream_timeout_seconds: 10.0  # open/read timeout of a stream URL: a dead camera fails each reconnect after this (0 = backend default, 30 s)
 
 zone:
-  # Polygon in pixels of the *calibration* frame (native resolution), around the crossing.
-  # Draw it with tools/calibrate_zone.py. Order the points around the boundary.
+  # Polygon in pixels of the *calibration* frame, around the crossing. Draw it with
+  # tools/calibrate_zone.py, which also writes reference_size and reference_image.
+  # Order the points around the boundary. This default is the polygon of the FOX13
+  # stress-test clip (1772x872, configs/stresstest.yaml): it is NOT a zone for any other
+  # camera - recalibrate. The monitor logs an ERROR and emits a HEALTH event at start-up
+  # when less than 90% of the polygon lies inside the frame.
   polygon: [[100, 400], [500, 350], [1650, 480], [1500, 600]]
+  # Zone file in the team's JSON format ({"vertices": [[x, y], ...]}; "polygon"/"points" or a
+  # bare list also load), same pixels as polygon. Replaces polygon when set; read once when the
+  # monitor starts. Relative paths: working directory. "" = use polygon. CLI: --zone ZONE.json
+  polygon_file: ""
+  # [width, height] of the frame the polygon was drawn on. The polygon is scaled by
+  # processed/reference size on both axes; a different aspect ratio (>1%) is refused.
+  # null = the native size of the first frame (or of reference_image when set).
+  reference_size: null
+  # Clean calibration frame the polygon was drawn on (no overlay). When set, live frames are
+  # registered against it, so a camera that moved between calibration and start-up is
+  # corrected on the first live frame. "" = anchor on the first live frame. Relative paths:
+  # working directory, then the repository root. Missing/unreadable = HEALTH event + live frame.
+  reference_image: ""
+  # Register live frames against reference_image this long (zone held meanwhile), then track
+  # from a live frame at the calibration pose (HEALTH event; retried at keyframe refreshes)
+  registration_timeout_seconds: 2.0
   stabilize: true             # track camera motion and warp the polygon every frame
+  # similarity (translation + rotation + uniform scale: a fixed pole camera), affine, or
+  # homography (8 DOF; fits perspective to whatever minority of points survives a train)
+  motion_model: similarity
   # Shi-Tomasi features on the reference keyframe (background only, see exclude_features_in_zone)
   max_corners: 400
   quality_level: 0.01
@@ -31,12 +62,12 @@ zone:
   # Lucas-Kanade optical flow
   lk_win_size: 21
   lk_max_level: 3
-  # RANSAC homography
+  # RANSAC fit of the motion model
   ransac_reproj_threshold: 3.0
   min_inliers: 30             # fewer inliers = unhealthy estimate (try ORB, else hold the last good polygon)
   # An LK estimate must also keep this share of the reference features as inliers
   # (needed = max(min_inliers, min_inlier_fraction * n_features)). A minority of corners
-  # locked onto self-similar sleeper/ballast texture can agree on a wrong homography and
+  # locked onto self-similar sleeper/ballast texture can agree on a wrong transform and
   # still clear min_inliers; 0 disables the relative test.
   min_inlier_fraction: 0.2
   # ORB descriptor fallback for large jumps / exposure change
@@ -44,17 +75,38 @@ zone:
   orb_features: 1500
   orb_ratio_test: 0.75
   orb_min_matches: 25
-  # Reject homographies that scale or change the polygon area implausibly
+  orb_min_inlier_fraction: 0.5   # ...and this share of the ratio-test matches must agree with the fit
+  # Reject transforms (relative to the calibration frame) that are implausible
   max_scale_change: 0.35
   max_area_change: 0.5
+  max_rotation_deg: 10.0
+  max_translation_fraction: 0.25   # zone centroid shift, fraction of the frame's larger side
+  # Temporal consistency: a vertex step larger than max(max_step_px, max_step_fraction *
+  # zone thickness) from the last accepted polygon is held (healthy=false) unless the frame
+  # refutes the last pose (the camera really moved) or confirm_frames consecutive
+  # estimates agree on the new pose (a count of measurements, not seconds; <= 1 = off)
+  max_step_px: 3.0
+  max_step_fraction: 0.1
+  confirm_frames: 3
+  # Reported polygon only: motion below this (largest vertex shift, px) snaps to the
+  # previous polygon, so a static camera gives a still zone. ZoneState.to_reference
+  # (debris registration) is never dead-zoned. 0 = off.
+  deadzone_px: 1.0
   # Re-anchor the reference keyframe after the scene has been static and healthy this long (0 = never)
   keyframe_refresh_static_seconds: 60.0
+  # A re-anchor must agree with a direct estimate against the calibration frame within this (px)
+  reanchor_max_drift_px: 1.0
   exclude_features_in_zone: true   # features inside the zone belong to traffic, not background
-  health_events: true         # emit a HEALTH event when the stabilizer flips healthy <-> unhealthy
+  health_events: true         # emit zone HEALTH events (health changes, reference_image registration)
+  health_report_seconds: 0.5  # report a health change only once it has lasted this long (0 = every change)
 
 detector:
   weights: "yolo11n.pt"       # COCO-pretrained (auto-download) or a local .pt/.engine/.onnx
-  conf: 0.25
+  conf: 0.25                  # decision threshold: plain detection, and boxes the tracker returns without an id
+  # What the tracker is fed (null = conf). 0.1 lets ByteTrack keep ids through 0.1-0.25 boxes (new tracks
+  # still need 0.25): on the team clips 11 % fewer id restarts, but more false-ALARM time and a later
+  # clip08 WARNING. Opt-in.
+  track_conf: null
   iou: 0.5
   imgsz: 640
   device: ""                  # "" auto, "0" first CUDA GPU, "cpu"
@@ -65,6 +117,10 @@ detector:
   vehicle_classes: [car, truck, bus, motorcycle, motorbike, jeep, van, tricycle, bicycle]
   person_classes: [person, pedestrian]
   train_classes: [train]      # a train in the zone is normal: never an alert, still excluded from the debris mask
+  # Dropped right after detection: never tracked, alerted on or blocking the zone keyframe refresh. For
+  # static false positives in the zone, e.g. [traffic light] on crossing signals. Vehicle, person and train
+  # boxes are excluded from the debris mask; other classes, ignored or not, stay visible to it.
+  ignore_classes: []
   max_det: 100
 
 infrastructure:
@@ -84,54 +140,103 @@ stuck:
   speed_window_seconds: 1.0   # least-squares velocity fit over this window of bottom-center positions
   min_history_for_speed: 3    # no speed estimate (and no stuck time) until this many samples exist
   ground_plane_homography: null   # optional 3x3 pixel -> ground metres; speeds become m/s
-  warning_seconds: 3.0        # stuck (in zone AND stationary) this long -> WARNING
-  alarm_seconds: 8.0          # ... -> ALARM
+  warning_seconds: 1.5        # stuck (in zone AND stopped) this long -> WARNING (provisional: one trapped-van event, 2 cameras)
+  alarm_seconds: 3.0          # ... -> ALARM (the task definition: "stops on the tracks for more than 3 s"; team E8)
   dwell_warning_seconds: 12.0 # in zone this long regardless of speed -> WARNING (creeping queue)
   dwell_alarm_seconds: 25.0
-  gates_down_warning_seconds: 1.0   # thresholds used while the gates are reported down
+  # Thresholds used while the gates are reported down; only those shorter than the normal ones escalate
+  # (a warning is logged for the others). The gate model is not validated on the team clips.
+  gates_down_warning_seconds: 1.0
   gates_down_alarm_seconds: 3.0
   gates_down_dwell_alarm_seconds: 6.0
-  lost_track_grace_seconds: 1.0     # keep an unseen track this long before dropping it
+  lost_track_grace_seconds: 1.0     # drop a track once its last detection is older than this ...
+  lost_track_missed_runs: 2         # ... AND this many detector runs in a row missed it (sparse detection)
+  undetected_clock_while_live: true # until then a missed in-zone vehicle's dwell/stuck clocks keep running (false = freeze until seen)
   min_track_age_frames: 2           # ignore brand-new ids (tracker flicker) for the zone logic
   fallback_iou_threshold: 0.3       # IoU matcher used when detections carry no track ids
   person_warning_seconds: 2.0
   person_alarm_seconds: 10.0
+  # Where a vehicle is relative to the zone (team EXPERIMENTS.md E4/E6). Persons, trains and
+  # unmapped classes always use the bottom-center point.
+  zone_test: "footprint"            # "footprint" (bottom strip of the box must overlap) | "bottom_center"
+  footprint_fraction: 0.25          # share of the box height, from the bottom, that touches the ground
+  footprint_min_overlap: 0.05       # share of the footprint inside the zone to count as "in the zone"
+  close_box_heights: 0.75           # "too close": footprint within this many box heights of the zone (0 = off)
+  close_policy: "warning"           # a vehicle stopped too close raises: off | warning | alarm ("merged" policy)
+  zone_exit_grace_seconds: 0.5      # a vehicle leaves the zone only after this long out of it (0 = at once)
+  # How "stopped" is decided: speed (least-squares speed < speed_threshold) | still (ID-free:
+  # the box keeps re-appearing with IoU >= still_min_iou where it first stood, gaps <=
+  # still_max_gap_seconds) | speed_or_still (either).
+  stationarity: "speed_or_still"
+  still_min_iou: 0.5
+  still_max_gap_seconds: 1.0        # must exceed the detector interval (a HEALTH event says when it does not)
+  still_border_margin: 0.01         # a box this close to the image border (share of width/height) with a train box beside it restarts its still clock (0 = off)
+  rekey_policy: "strict"            # a new id may take over: strict (vehicle <- stopped vehicle, person <- person; clocks go back) | any
+  label_hold_seconds: 1.0           # a stopped in-zone vehicle keeps its category through shorter label flicker, an alarmed one through any (0 = off)
+  # An alarmed vehicle lost under a train box stays a hazard this long after the train (0 = off). On the
+  # team clips it also holds false alarms of far-side cars waiting in the thin zones: +58 s in 461 s.
+  occlusion_memory_seconds: 3.0
+  camera_motion_compensation: true  # fit speeds / match clusters in zone reference coordinates when the zone provides them
 
 debris:
   enabled: true
-  history: 300                # MOG2 history (only matters during warm-up and refresh)
+  history: 300                # MOG2 history (sets the automatic learning rate of the warm-up)
   var_threshold: 50.0
   detect_shadows: true        # shadow pixels are dropped; set false for night/IR cameras (dark objects)
-  warmup_frames: 300          # frames learned before monitoring starts; start on a clear crossing
-  monitoring_learning_rate: 0.0     # 0 = background frozen: a stationary obstruction is never absorbed
-  empty_seconds_before_refresh: 5.0 # adapt slowly once the tracker has seen the zone empty this long (0 = never)
-  empty_learning_rate: 0.005
+  # Warm-up: learn the scene this long before monitoring. Pixels under a detection box are
+  # never learned; those not seen box-free stay unknown (excluded, reported) until they are.
+  warmup_seconds: 2.0
+  warmup_frames: null         # legacy: a frame count instead of warmup_seconds
+  monitoring_learning_rate: 0.0     # rate of the per-frame classification (0 = frozen: nothing is absorbed)
+  # Selective update: every update_interval_seconds the model learns, with this time constant,
+  # only background pixels outside boxes and candidates (lighting drift is followed on a busy
+  # crossing; no foreground pixel in the zone is ever absorbed). 0 = off.
+  update_time_constant_seconds: 30.0
+  update_interval_seconds: 0.5
+  learn_seconds: 1.0          # an unknown pixel joins the model after this long box-free and background
   exclusion_dilate_px: 12     # detection boxes are grown by this before being removed from the foreground
   morph_kernel: 5
   min_blob_area_fraction: 0.002     # drop connected components smaller than this fraction of the zone
-  min_area_fraction: 0.03           # total debris area needed to start the persistence timer
-  persist_seconds: 3.0              # continuous seconds over threshold before a debris ALARM
-  # Foreground bigger than this fraction of an *empty* zone AND of the frame outside the zone
-  # is a lighting step (floodlight, IR-cut switch, exposure jump), not an obstruction: the
-  # background model is re-warmed and a HEALTH event is emitted instead of latching an alarm
-  # that could never clear. 0 = off, which makes such a step alarm as debris (and stay
-  # alarmed until the monitor restarts).
+  min_area_fraction: 0.03           # debris area (share of the zone) that starts the persistence timer...
+  min_object_frame_fraction: 0.002  # ...or this share of the processing frame, whichever is smaller
+  persist_seconds: 3.0              # seconds a candidate must be seen static before a debris ALARM
+  occlusion_bridge_seconds: 5.0     # a covered candidate keeps its persistence this long (covered time not counted)
+  gain_compensation: true     # divide out the global gain (estimated outside the zone) before classifying
+  rewarm_gain: 2.0            # re-warm when a channel gain stays beyond [1/x, x] for 1 s (0 = never)
+  # Foreground over more than this fraction of the zone AND of the modelled region outside it is a change
+  # the gain cannot explain (IR-cut switch, floodlights): re-warm with a HEALTH event instead of
+  # latching an ALARM. Never while debris is triggered. 0 = off.
   max_area_fraction: 0.75
-  # Debris must be immobile: the persistence timer restarts on any frame where more than
-  # static_motion_fraction of the candidate pixels change by more than static_motion_diff
-  # grey levels, or where the continuously-present part of the blob drops below
-  # min_area_fraction. Without this an undetected object (a train under weights with no
-  # "train" class, a crowd) alarms simply by taking longer than persist_seconds to cross.
-  static_motion_diff: 12.0          # 0 disables the frame-to-frame content test
+  # Debris must be immobile: a candidate restarts while more than static_motion_fraction of its
+  # pixels changed by more than static_motion_diff grey levels against a frame
+  # static_motion_lag_seconds old (+-1 px tolerance: camera jitter is not motion).
+  static_motion_diff: 12.0          # 0 disables the content test
   static_motion_fraction: 0.15
+  static_motion_lag_seconds: 0.5
+  # A train over the zone holds the timers until hold_linger_seconds after it was last seen (3 s
+  # bridges most gaps between a passing train's detections; debris is blind that long after it).
+  # A hold that starts again within persist_seconds restarts the candidates of the gap.
+  hold_linger_seconds: 3.0
+  ghost_heal_seconds: 2.0     # re-learn a candidate whose outline exists only in the model (0 = never)
+  ghost_heal_max_seen_seconds: 5.0  # ...only if that model content was seen for less than this (0 = no limit)
+  max_unknown_fraction: 0.5   # DebrisResult.trusted is false above this unknown share of the zone
+  process_width: 640          # process wider frames at this width (cost); 0 = native
+  ignore_polygons: []         # calibration-pixel polygons excluded from debris (e.g. a resting gate arm)
 
 alerts:
   latch_seconds: 10.0         # ALARM stays raised this long after the last alarm condition
   repeat_notify_seconds: 30.0 # re-send ALARM_START (extra.repeat=true) while it persists (0 = never)
+  warning_hold_seconds: 2.0   # WARNING stays this long after its last condition while its objects are still in/near the zone (0 = off)
+  health_debounce_seconds: 1.0  # report a DEGRADED change (HEALTH, component "monitor") once it has lasted this long (0 = every change)
   stdout: true                # print events to the console
   events_jsonl: ""            # path of the JSONL event log ("" = off); read by gradecrossing.evaluate
-  webhook_url: ""             # POST each event as JSON here ("" = off)
-  webhook_timeout_seconds: 3.0
+  webhook_url: ""             # POST each event as JSON here ("" = off); payloads carry an "event_id" for de-duplication
+  webhook_timeout_seconds: 3.0      # per socket operation of a POST (connect, send, each read), as in urllib
+  webhook_attempts: 3               # POST attempts per event (1 = no retry); refused/timeout/5xx/408/429 are retried
+  webhook_backoff_seconds: 0.5      # wait before the first retry, doubling after each failure (0.5, 1, 2 s ...)
+  webhook_deadline_seconds: null    # wall-clock budget per event for all attempts and waits; the attempt running
+                                    # when it passes is aborted (null = attempts x timeout + the waits: 10.5 s)
+  webhook_max_queue: 256            # events awaiting delivery; ALARM events go first, a full queue drops the oldest non-ALARM one
 
 output:
   display: false              # cv2.imshow window (needs a GUI build of OpenCV; q/Esc quits)

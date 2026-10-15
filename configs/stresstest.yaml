@@ -1,38 +1,45 @@
 # The FOX13 "Rail-Grade-Crossing-StressTest.mov" clip (1772x872, 31.45 fps, ~32.7 s), from the
-# upstream GitHub Releases tab (v1.1). Put the file in videos/ (git-ignored).
+# upstream GitHub Releases tab (v1.1); the same video is clip01 of the team benchmark
+# (benchmarks/team_clips, tools/fetch_clips.py). Put the file in videos/ (*.mov is git-ignored).
+# An SUV drives onto the crossing at about 2 s and stays on it, manoeuvring, until a train
+# arrives at about 28 s.
 #
 #   python -m gradecrossing.monitor --config configs/stresstest.yaml --events events.jsonl
-#   python -m gradecrossing.evaluate --events events.jsonl --truth data/truth.csv
-#       --video Rail-Grade-Crossing-StressTest.mov --duration-s 32.7
+#   python -m gradecrossing.evaluate --events events.jsonl --truth benchmarks/team_clips/ground_truth/clip01.json
 #
-# Only the keys that differ from configs/default.yaml are listed.
+# Listed: this site (video.source and the zone calibration) and the keys that differ from
+# configs/default.yaml. Everything else is the default.
+#
+# What it does with the current code (measured on clip01, yolo11n.pt, gradecrossing 0.3.0;
+# times are the file's container clock, which on this variable-frame-rate clip runs up to
+# 0.8 s apart from frame / fps): a WARNING at 3.4 s for another car stopped near the tracks
+# ('vehicle 7 (car) stopped near the tracks'), then ALARM at 5.5 s, 'vehicle 2 (car)
+# stationary in zone 3.0s' - the SUV, under the 3 s stationary-in-zone rule - i.e. 3.5 s
+# after it reaches the crossing (2.0 s in the ground truth), and the run stays in ALARM to
+# the end of the clip. The debris backstop adds nothing.
 
 video:
   source: "videos/Rail-Grade-Crossing-StressTest.mov"
 
 zone:
-  # Crossing polygon at the native 1772x872 resolution (the polygon the original prototype used).
+  # Crossing polygon at the native 1772x872 resolution (the polygon the original prototype
+  # used; the built-in default polygon is this same one, which fits no other camera).
   polygon: [[100, 400], [500, 350], [1650, 480], [1500, 600]]
+  reference_size: [1772, 872]
 
-detector:
-  # COCO-pretrained; downloads on first use. Keep a model with a "train" class for this clip:
-  # a train passes through the zone, and a train the detector does not name is not excluded
-  # from the debris mask. The immobility test in background.py stops most such objects from
-  # alarming, but a long train filling the zone can still look static - with
-  # --weights 50_epochs_best.pt (6 vehicle classes, no train) add --config override
-  # debris.enabled: false, or expect a debris alarm during the passage.
-  weights: "yolo11n.pt"
-  conf: 0.25
-  tracker: "bytetrack.yaml"
+# detector: the default yolo11n.pt (COCO) is the right model for this clip because it has a
+# "train" class: a train passes through the zone at the end, and a train the detector does
+# not name is left to the debris backstop. With --weights 50_epochs_best.pt (6 vehicle
+# classes, no train) the same run alarms at 5.5 s too (the SUV; its WARNING comes at 3.9 s)
+# and the debris backstop joins the alarm from 12.0 s ('debris 17.9% of zone'). To run
+# without the backstop, set debris.enabled: false in a copy of this file.
 
-debris:
-  # The clip is short: a 300-frame warm-up would eat 10 s of a 32 s video. The first
-  # seconds of the clip show an empty crossing, which is what the warm-up needs.
-  warmup_frames: 90
-
-alerts:
-  stdout: true
-  events_jsonl: ""            # pass --events events.jsonl on the command line
+# debris: the default warm-up (warmup_seconds 2.0) is used. The crossing is NOT empty then:
+# the SUV is already inside the zone (4.9 s of in-zone dwell at the 5.5 s ALARM). The
+# warm-up never learns pixels under a detection box, so the SUV does not become background;
+# what it covers stays UNKNOWN (not judged by the debris backstop) until it has been seen
+# box-free. Measured: the warm-up ends at 2.05 s (frame 89: the clip's frame rate varies)
+# with 2% of the zone not yet seen box-free.
 
 output:
   print_every_n_frames: 30
